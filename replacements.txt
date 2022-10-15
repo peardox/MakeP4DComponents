@@ -1,0 +1,15 @@
+const
+__P4D__ : always P4D
+__DCL__ : always DCL
+
+group vars
+__PALETTE_PAGE__  : eg P4D Data Sciences
+
+component vars
+__COMPONENT__ : eg H5Py
+__PUBLIC_PROPERTY__ : e.g. h5py
+__PACKAGE_NAME__ : e.g. h5py
+__PACKAGE_NAME_PIP__ : e.g. h5py
+__PACKAGE_NAME_CONDA__ : e.g. h5py
+__PALETTE_GUID__ : Random GUID
+__PACKAGE_GUID__ : Random GUID
