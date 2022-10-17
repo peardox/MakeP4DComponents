@@ -13,16 +13,15 @@ type
     procedure ExtractToStream(var OutStream: TStream; Index: Integer; const Path: string; CreateSubdirs: Boolean = True);
   end;
 
-  TZipExtractForm = class(TForm)
+  TMainForm = class(TForm)
    ProgressBar1: TProgressBar;
     Panel1: TPanel;
     Button1: TButton;
     OpenDialog1: TOpenDialog;
     Button2: TButton;
     Memo1: TMemo;
-    H5Py1: TH5Py;
     procedure Button1Click(Sender: TObject);
-    procedure ExtractOneZip(const AFile: String; const DestPath: String);
+    procedure ExtractResourceZip(const AFile: String; const DestPath: String);
     procedure ShowZipProgress(Sender: TObject; AFilename: String; AHeader: TZipHeader; APosition: Int64);
     procedure ExtractTemplate;
     procedure FormCreate(Sender: TObject);
@@ -39,18 +38,19 @@ type
     ProgressBar: TProgressBar;
     procedure FormReset;
     procedure Log(const AMsg: String);
-    function ClassExists(const AClass: String): Boolean;
   public
     { Public declarations }
   end;
 
 var
-  ZipExtractForm: TZipExtractForm;
+  MainForm: TMainForm;
   AppHome: String;
 
 implementation
 
 {$R *.fmx}
+{$R EmbeddedResources.RES}
+
 uses
   Math,
   System.IOUtils;
@@ -154,12 +154,12 @@ begin
 end;
 
 
-procedure TZipExtractForm.Log(const AMsg: String);
+procedure TMainForm.Log(const AMsg: String);
 begin
   Memo1.Lines.Add(AMsg);
 end;
 
-procedure TZipExtractForm.ShowZipProgress(Sender: TObject; AFilename: String; AHeader: TZipHeader; APosition: Int64);
+procedure TMainForm.ShowZipProgress(Sender: TObject; AFilename: String; AHeader: TZipHeader; APosition: Int64);
 var
   PosTick: Int64;
 begin
@@ -182,16 +182,17 @@ begin
     end;
 end;
 
-procedure TZipExtractForm.Button2Click(Sender: TObject);
+procedure TMainForm.Button2Click(Sender: TObject);
 begin
   Application.Terminate;
 end;
 
-procedure TZipExtractForm.ExtractOneZip(const AFile: String; const DestPath: String);
+procedure TMainForm.ExtractResourceZip(const AFile: String; const DestPath: String);
 var
   z: TZipFile;
   I, ZipCount: Int64;
   OutStream: TStream;
+  LResStream: TResourceStream;
 begin
   ProgressBar.Value := 0;
   ProgFile := '';
@@ -203,7 +204,9 @@ begin
   try
     try
       z := TZipFile.Create;
-      z.Open(AFile, TZipMode.zmRead);
+//      z.Open(AFile, TZipMode.zmRead);
+      LResStream := TResourceStream.Create(HInstance, 'Template', RT_RCDATA);
+      z.Open(LResStream, TZipMode.zmRead);
 
 
       ZipCount := Length(z.FileNames);
@@ -216,59 +219,28 @@ begin
 
       for I := 0 to ZipCount - 1 do
         begin
-          Log(sLineBreak + 'Processing ' + AFile
+          Log(sLineBreak + 'Processing Template'
             + ' (' + IntToStr(I+1)
-            + ' of ' + IntToStr(ZipCount) + ')');
-{
-            + sLineBreak
-            + sLineBreak
-            + 'Extracting ' + z.FileName[I]
-}
-            ;
+            + ' of ' + IntToStr(ZipCount) + ')'
+            + ' - Extracting ' + z.FileName[I]);
           z.ExtractToStream(OutStream, i, DestPath);
         end;
 
     except
       on E: Exception do
         begin
-          Log('Unhandled Exception in ExtractOneZip');
+          Log('Unhandled Exception in ExtractResourceZip');
           Log('Class : ' + E.ClassName);
           Log('Error : ' + E.Message);
         end;
     end;
   finally
     z.Free;
+    LResStream.Free;
   end;
 end;
 
-function TZipExtractForm.ClassExists(const AClass: String): Boolean;
-var
-  ExistingClass: TPersistentClass;
-begin
-  Result := False;
-  try
-    try
-      ExistingClass := GetClass(AClass);
-      RegisterComponents('Python Packages for Delphi', [TH5Py]);
-      if ExistingClass = Nil then
-        Log('Not Registered')
-      else
-        Log('Registered');
-    except
-      on E: Exception do
-        begin
-          Result := True;
-          Log('Unhandled Exception in ClassExists');
-          Log('Class : ' + E.ClassName);
-          Log('Error : ' + E.Message);
-        end;
-    end;
-  finally
-
-  end;
-end;
-
-procedure TZipExtractForm.ExtractTemplate;
+procedure TMainForm.ExtractTemplate;
 var
   z: TZipFile;
   ZipOut: String;
@@ -276,9 +248,7 @@ var
 begin
   ZipOut := TPath.Combine(AppHome, 'extracted');
 
-  ClassExists('TH5Py');
-
-  ExtractOneZip('template.zip', ZipOut);
+  ExtractResourceZip('template.zip', ZipOut);
 
   Log('Extracted Template');
   Button1.Text := 'Close';
@@ -287,7 +257,7 @@ begin
   ProgressBar.Value := 0;
 end;
 
-procedure TZipExtractForm.Button1Click(Sender: TObject);
+procedure TMainForm.Button1Click(Sender: TObject);
 begin
   Button2.Visible := False;
 
@@ -303,13 +273,13 @@ begin
     ExtractTemplate;
 end;
 
-procedure TZipExtractForm.FormClose(Sender: TObject; var Action: TCloseAction);
+procedure TMainForm.FormClose(Sender: TObject; var Action: TCloseAction);
 begin
   if ModalResult <> mrClose then
     ModalResult := mrCancel;
 end;
 
-procedure TZipExtractForm.FormCreate(Sender: TObject);
+procedure TMainForm.FormCreate(Sender: TObject);
 var
   DownPath: String;
   DocPath: String;
@@ -331,17 +301,17 @@ begin
   OpenDialog1.InitialDir := DownPath;
 end;
 
-procedure TZipExtractForm.FormShow(Sender: TObject);
+procedure TMainForm.FormShow(Sender: TObject);
 begin
   FormReset;
 end;
 
-procedure TZipExtractForm.FormActivate(Sender: TObject);
+procedure TMainForm.FormActivate(Sender: TObject);
 begin
 //  FormReset;
 end;
 
-procedure TZipExtractForm.FormReset;
+procedure TMainForm.FormReset;
 begin
   Button1.Enabled := True;
   Button1.Text := 'Import';

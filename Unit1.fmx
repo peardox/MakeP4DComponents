@@ -1,9 +1,10 @@
-object ZipExtractForm: TZipExtractForm
+object MainForm: TMainForm
   Left = 0
   Top = 0
   Caption = 'Form1'
-  ClientHeight = 168
+  ClientHeight = 334
   ClientWidth = 640
+  Position = DesktopCenter
   FormFactor.Width = 320
   FormFactor.Height = 480
   FormFactor.Devices = [Desktop]
@@ -15,7 +16,7 @@ object ZipExtractForm: TZipExtractForm
   end
   object Panel1: TPanel
     Align = Bottom
-    Position.Y = 136.000000000000000000
+    Position.Y = 302.000000000000000000
     Size.Width = 640.000000000000000000
     Size.Height = 32.000000000000000000
     Size.PlatformDefault = False
@@ -42,7 +43,7 @@ object ZipExtractForm: TZipExtractForm
   object ProgressBar1: TProgressBar
     Align = Bottom
     Orientation = Horizontal
-    Position.Y = 116.000000000000000000
+    Position.Y = 282.000000000000000000
     Size.Width = 640.000000000000000000
     Size.Height = 20.000000000000000000
     Size.PlatformDefault = False
@@ -50,19 +51,13 @@ object ZipExtractForm: TZipExtractForm
   object Memo1: TMemo
     Touch.InteractiveGestures = [Pan, LongTap, DoubleTap]
     DataDetectorTypes = []
-    Align = Client
+    Align = Bottom
+    Position.Y = 176.000000000000000000
     Size.Width = 640.000000000000000000
-    Size.Height = 116.000000000000000000
+    Size.Height = 106.000000000000000000
     Size.PlatformDefault = False
     TabOrder = 4
     Viewport.Width = 636.000000000000000000
-    Viewport.Height = 112.000000000000000000
-  end
-  object H5Py1: TH5Py
-    AutoImport = False
-    ManagerKind = pip
-    AutoInstall = False
-    Left = 528
-    Top = 24
+    Viewport.Height = 102.000000000000000000
   end
 end
