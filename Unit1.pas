@@ -9,35 +9,38 @@ uses
   PyCommon, PyModule, PyPackage, H5Py;
 
 type
+  TTemplateFile = Class
+    TplFileName: String;
+    TplTemplate: String;
+    constructor Create(AFileName: string; ATemplate: String);
+  End;
+
   TZipFileHelper = class helper for TZipFile
-    procedure ExtractToStream(var OutStream: TStream; Index: Integer; const Path: string; CreateSubdirs: Boolean = True);
+    function ExtractToStream(var OutStream: TStream; Index: Integer): TTemplateFile;
   end;
 
   TMainForm = class(TForm)
-   ProgressBar1: TProgressBar;
     Panel1: TPanel;
     Button1: TButton;
     OpenDialog1: TOpenDialog;
     Button2: TButton;
     Memo1: TMemo;
     procedure Button1Click(Sender: TObject);
-    procedure ExtractResourceZip(const AFile: String; const DestPath: String);
-    procedure ShowZipProgress(Sender: TObject; AFilename: String; AHeader: TZipHeader; APosition: Int64);
+    procedure ExtractTemplateResourceZip;
     procedure ExtractTemplate;
     procedure FormCreate(Sender: TObject);
     procedure Button2Click(Sender: TObject);
     procedure FormShow(Sender: TObject);
     procedure FormActivate(Sender: TObject);
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
+    procedure FormDestroy(Sender: TObject);
   private
     { Private declarations }
-    ProgCount: Int64;
-    PaintCount: Int64;
-    ProgTick: Int64;
-    ProgFile: String;
-    ProgressBar: TProgressBar;
+    TemplateList: TList;
     procedure FormReset;
+    procedure FreeList;
     procedure Log(const AMsg: String);
+    procedure HaltAndCatchFire;
   public
     { Public declarations }
   end;
@@ -55,14 +58,26 @@ uses
   Math,
   System.IOUtils;
 
-procedure TZipFileHelper.ExtractToStream(var OutStream: TStream; Index: Integer; const Path: string; CreateSubdirs: Boolean);
+constructor TTemplateFile.Create(AFileName: string; ATemplate: String);
+begin
+  Inherited Create;
+  TplFileName := AFileName;
+  TplTemplate := ATemplate;
+end;
+
+function TemplateSortFunc(Item1, Item2: Pointer): Integer;
+begin
+  Result := CompareText(TTemplateFile(Item1).TplFileName, TTemplateFile(Item2).TplFileName);
+end;
+
+Function TZipFileHelper.ExtractToStream(var OutStream: TStream; Index: Integer): TTemplateFile;
 var
-  LInStream, LOutStream: TStream;
+  LInStream: TStream;
   LHeader: TZipHeader;
   LDir, LFileName: string;
   LModifiedDateTime: TDateTime;
-
-  FCurrentHeader: TZipHeader;
+  Template: TTemplateFile;
+  TemplateText: String;
   FCurrentFile: String;
 
   // Not exposed by TZip.pas
@@ -90,28 +105,18 @@ var
   end;
 
 begin
+  Template := Nil;
   // Get decompression stream for file
   Read(Index, LInStream, LHeader);
-  FCurrentHeader := LHeader;
   try
     if not GetUTF8PathFromExtraField(LHeader, LFileName) then
       LFileName := InternalGetFileName(Index);
 {$IFDEF MSWINDOWS} // ZIP stores files with '/', so translate to a relative Windows path.
     LFileName := StringReplace(LFileName, '/', '\', [rfReplaceAll]);
 {$ENDIF}
-    // CreateSubDirs = False assumes the user passed in the path where they want the file to end up
-    if CreateSubdirs then
-      LFileName := TPath.Combine(Path, LFileName)
-    else
-      LFileName := TPath.Combine(Path, ExtractFileName(LFileName));
-    // Force directory creation
-    LDir := ExtractFileDir(LFileName);
-    if CreateSubdirs and (LDir <> '') then
-      TDirectory.CreateDirectory(ExtractFileDir(LFileName));
     // Open the File For output
     if LFileName.Chars[LFileName.Length-1] = PathDelim then
-      Exit; // Central Directory Entry points at a directory, not a file.
-    LOutStream := TFileStream.Create(LFileName, fmCreate);
+      Exit(Nil); // Central Directory Entry points at a directory, not a file.
     try // And Copy from the decompression stream.
       FCurrentFile := LFileName;
       // See Bit 3 at http://www.pkware.com/documents/casestudies/APPNOTE.TXT
@@ -119,37 +124,22 @@ begin
       begin
         // Empty files should not be read
         if LHeader.UncompressedSize > 0 then
-          LOutStream.CopyFrom(LInStream, LHeader.UncompressedSize);
+          begin
+            SetString(TemplateText, PChar(LInStream), LHeader.UncompressedSize);
+            Template := TTemplateFile.Create(FCurrentFile, TemplateText);
+          end;
       end
       else
       begin
-        LOutStream.CopyFrom(LInStream, LHeader.UncompressedSize);
+        SetString(TemplateText, PChar(LInStream), LHeader.UncompressedSize);
+        Template := TTemplateFile.Create(FCurrentFile, TemplateText);
       end;
-      if Assigned(OnProgress) then
-        OnProgress(Self, FCurrentFile, FCurrentHeader, LOutStream.Position);
     finally
-      LOutStream.Free;
       FCurrentFile := '';
     end;
-    if FileExists(LFileName) then
-    begin
-      if WinFileDateToDateTime(LHeader.ModifiedDateTime, LModifiedDateTime) then
-      begin
-        TFile.SetCreationTime(LFileName, LModifiedDateTime);
-        TFile.SetLastWriteTime(LFileName, LModifiedDateTime);
-      end;
-{$IFDEF MSWINDOWS}
-      if (Hi(LHeader.MadeByVersion) = MADEBY_MSDOS) then
-        TFile.SetAttributes(LFileName, TFile.IntegerToFileAttributes(LHeader.ExternalAttributes and $000000FF));
-{$ENDIF}
-{$IFDEF POSIX}
-      if (Hi(FFiles[Index].MadeByVersion) = MADEBY_UNIX) and (FFiles[Index].ExternalAttributes shr 16 <> 0) then
-        TFile.SetAttributes(LFileName, TFile.IntegerToFileAttributes(FFiles[Index].ExternalAttributes shr 16));
-{$ENDIF}
-    end;
   finally
-    FCurrentHeader := Default(TZipHeader);
     LInStream.Free;
+    Result := Template;
   end;
 end;
 
@@ -159,52 +149,24 @@ begin
   Memo1.Lines.Add(AMsg);
 end;
 
-procedure TMainForm.ShowZipProgress(Sender: TObject; AFilename: String; AHeader: TZipHeader; APosition: Int64);
-var
-  PosTick: Int64;
-begin
-  if Assigned(ProgressBar) then
-    begin
-      if(ProgFile <> AFilename) then
-        begin
-          ProgFile := AFilename;
-          Inc(ProgCount);
-          ProgressBar.Value := ProgCount;
-          PosTick := floor((ProgCount / ProgressBar.Max) * ProgressBar.Width);
-          if(ProgTick <> PosTick) then
-            begin
-              ProgTick := PosTick;
-              Inc(PaintCount);
-              ProgressBar.Repaint;
-              Application.ProcessMessages;
-            end;
-        end;
-    end;
-end;
-
 procedure TMainForm.Button2Click(Sender: TObject);
 begin
   Application.Terminate;
 end;
 
-procedure TMainForm.ExtractResourceZip(const AFile: String; const DestPath: String);
+procedure TMainForm.ExtractTemplateResourceZip;
 var
   z: TZipFile;
   I, ZipCount: Int64;
   OutStream: TStream;
   LResStream: TResourceStream;
+  Template: TTemplateFile;
 begin
-  ProgressBar.Value := 0;
-  ProgFile := '';
-  ProgTick := 0;
-  ProgCount := 0;
-  PaintCount := 0;
   Application.ProcessMessages;
 
   try
     try
       z := TZipFile.Create;
-//      z.Open(AFile, TZipMode.zmRead);
       LResStream := TResourceStream.Create(HInstance, 'Template', RT_RCDATA);
       z.Open(LResStream, TZipMode.zmRead);
 
@@ -212,24 +174,23 @@ begin
       ZipCount := Length(z.FileNames);
       Log('Files = ' + IntToStr(ZipCount));
 
-      ProgressBar.Min := 0;
-      ProgressBar.Max := ZipCount - 1;
-      ProgressBar.Value := 0;
-      z.OnProgress := ShowZipProgress;
+      if Assigned(TemplateList) then
+        FreeList;
+      TemplateList := TList.Create;
 
       for I := 0 to ZipCount - 1 do
         begin
-          Log(sLineBreak + 'Processing Template'
-            + ' (' + IntToStr(I+1)
-            + ' of ' + IntToStr(ZipCount) + ')'
-            + ' - Extracting ' + z.FileName[I]);
-          z.ExtractToStream(OutStream, i, DestPath);
+          Template := z.ExtractToStream(OutStream, i);
+          if not (Template = Nil) then
+            begin
+              TemplateList.Add(Template);
+            end;
         end;
 
     except
       on E: Exception do
         begin
-          Log('Unhandled Exception in ExtractResourceZip');
+          Log('Unhandled Exception in ExtractTemplateResourceZip');
           Log('Class : ' + E.ClassName);
           Log('Error : ' + E.Message);
         end;
@@ -237,24 +198,36 @@ begin
   finally
     z.Free;
     LResStream.Free;
+    if Assigned(TemplateList) then
+      begin
+        TemplateList.Sort(@TemplateSortFunc);
+        Log('Templates = ' + IntToStr(TemplateList.Count));
+        for I := 0 to TemplateList.Count -1 do
+          begin
+            Template := TemplateList[I];
+            Log(Template.TplFileName);
+          end;
+      end;
   end;
 end;
 
-procedure TMainForm.ExtractTemplate;
-var
-  z: TZipFile;
-  ZipOut: String;
-  I: Integer;
+procedure TMainForm.HaltAndCatchFire;
 begin
-  ZipOut := TPath.Combine(AppHome, 'extracted');
+  ShowMessage('Something went horribly wrong');
+  Application.Terminate;
+end;
 
-  ExtractResourceZip('template.zip', ZipOut);
+procedure TMainForm.ExtractTemplate;
+begin
+  ExtractTemplateResourceZip;
+  if Not Assigned(TemplateList) then
+    HaltAndCatchFire;
+  if Not TemplateList.Count = 0 then
+    HaltAndCatchFire;
 
   Log('Extracted Template');
   Button1.Text := 'Close';
   Button1.Enabled := True;
-
-  ProgressBar.Value := 0;
 end;
 
 procedure TMainForm.Button1Click(Sender: TObject);
@@ -285,8 +258,7 @@ var
   DocPath: String;
 begin
   AppHome := '.';
-  Log('Import a Lartis Style Archive');
-  ProgressBar := ProgressBar1;
+  Log('Import a Python Template');
   DocPath := TPath.GetDocumentsPath;
   DownPath := ExpandFileName(TPath.Combine(TPath.Combine(DocPath, '..'), 'Downloads'));
   if not DirectoryExists(DownPath) then
@@ -299,6 +271,28 @@ begin
 
   OpenDialog1.Filter:='Lartis Style Archives (*.lartis.zip)|*.lartis.zip';
   OpenDialog1.InitialDir := DownPath;
+end;
+
+// Tidy up after ourselves
+procedure TMainForm.FormDestroy(Sender: TObject);
+begin
+  FreeList;
+end;
+
+procedure TMainForm.FreeList;
+var
+  I: Integer;
+  Template: TTemplateFile;
+begin
+    if Assigned(TemplateList) then
+      begin
+        for I := 0 to TemplateList.Count -1 do
+          begin
+            Template := TemplateList[I];
+            Template.Free;
+          end;
+        FreeAndNil(TemplateList);
+      end;
 end;
 
 procedure TMainForm.FormShow(Sender: TObject);
