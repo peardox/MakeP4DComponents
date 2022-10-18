@@ -5,20 +5,7 @@
 	"homepage": "__PROJECT_HOMEPAGE__",
 	"mainsrc": "./src",
 	"projects": [
-		"./src/Boto3/dclP4DBoto3.dproj",
-		"./src/Boto3/P4DBoto3.dproj",
-		"./src/H5Py/dclP4DH5Py.dproj",
-		"./src/H5Py/P4DH5Py.dproj",
-		"./src/MoviePy/dclP4DMoviePy.dproj",
-		"./src/MoviePy/P4DMoviePy.dproj",
-		"./src/Pillow/dclP4DPillow.dproj",
-		"./src/Pillow/P4DPillow.dproj",
-		"./src/PSUtil/dclP4DPSUtil.dproj",
-		"./src/PSUtil/P4DPSUtil.dproj",
-		"./src/PyQT5/dclP4DPyQT5.dproj",
-		"./src/PyQT5/P4DPyQT5.dproj",
-		"./src/RemBG/dclP4DRemBG.dproj",
-		"./src/RemBG/P4DRemBG.dproj"
+__PROJECTS__
 	],
 	"dependencies": {
 		"https://github.com/embarcadero/lightweight-python-wrappers": "^v0.0.1-alpha"

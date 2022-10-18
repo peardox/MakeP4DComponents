@@ -12,6 +12,6 @@ https://github.com/Embarcadero/PythonEnviroments
 
 https://github.com/Embarcadero/Lightweight-Python-Wrappers
 
-https://github.com/Embarcadero/P4D-Data-Sciences/
+https://github.com/Embarcadero/P4D-Data-Sciences
 
 https://github.com/Embarcadero/PythonPackages4Delphi

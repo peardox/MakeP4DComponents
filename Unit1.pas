@@ -1,12 +1,14 @@
 unit Unit1;
 
 interface
+{$DEFINE EXTRACTTOSTREAM}
 
 uses
   System.SysUtils, System.Types, System.UITypes, System.Classes, System.Variants,
   FMX.Types, FMX.Controls, FMX.Forms, FMX.Graphics, FMX.Dialogs, FMX.Memo.Types,
   System.Zip, FMX.Controls.Presentation, FMX.ScrollBox, FMX.Memo, FMX.StdCtrls,
-  PyCommon, PyModule, PyPackage, H5Py;
+  PyCommon, PyModule, PyPackage, H5Py, FMX.Edit, System.Rtti, FMX.Grid.Style,
+  FMX.Grid;
 
 type
   TTemplateFile = Class
@@ -16,7 +18,8 @@ type
   End;
 
   TZipFileHelper = class helper for TZipFile
-    function ExtractToStream(var OutStream: TStream; Index: Integer): TTemplateFile;
+    function ExtractToStream(var OutStream: TStream; Index: Integer): TTemplateFile; overload;
+    function ExtractToStream(Index: Integer; const Path: string; CreateSubdirs: Boolean): TTemplateFile; overload;
   end;
 
   TMainForm = class(TForm)
@@ -24,7 +27,23 @@ type
     Button1: TButton;
     OpenDialog1: TOpenDialog;
     Button2: TButton;
-    Memo1: TMemo;
+    mmoReadMe: TMemo;
+    lblProjectTitle: TLabel;
+    edtProjectTitle: TEdit;
+    lblReadMe: TLabel;
+    lblProjectGroupName: TLabel;
+    edtProjectGroupName: TEdit;
+    lblProjectGroupNameExt: TLabel;
+    lblProjectHomepage: TLabel;
+    edtProjectHomepage: TEdit;
+    lblProjectDesc: TLabel;
+    edtProjectDesc: TEdit;
+    lblProjectVersion: TLabel;
+    edtProjectVersion: TEdit;
+    edtPalettePage: TLabel;
+    Edit4: TEdit;
+    lblComponents: TLabel;
+    StringGrid1: TStringGrid;
     procedure Button1Click(Sender: TObject);
     procedure ExtractTemplateResourceZip;
     procedure ExtractTemplate;
@@ -45,6 +64,15 @@ type
     { Public declarations }
   end;
 
+  TBoss = record
+    name: String;
+    description: String;
+    version: String;
+    homepage: String;
+    mainsrc: String;
+    projects: TArray<String>;
+    dependencies: String;
+  end;
 var
   MainForm: TMainForm;
   AppHome: String;
@@ -56,7 +84,30 @@ implementation
 
 uses
   Math,
+  System.Json.Serializers,
   System.IOUtils;
+
+procedure DecodeBossJson(const ABoss: String);
+var
+  lSerializer: TJsonSerializer;
+  log: TBoss;
+begin
+  lSerializer := TJsonSerializer.Create;
+  try
+    try
+      log := lSerializer.Deserialize<TBoss>(ABoss);
+    except
+     on E : Exception do
+     begin
+       MainForm.Log('Exception class name = '+E.ClassName);
+       MainForm.Log('Exception message = '+E.Message);
+       MainForm.Log(ABoss);
+     end;
+    end;
+  finally
+    FreeAndNil(lSerializer);
+  end;
+end;
 
 constructor TTemplateFile.Create(AFileName: string; ATemplate: String);
 begin
@@ -70,15 +121,19 @@ begin
   Result := CompareText(TTemplateFile(Item1).TplFileName, TTemplateFile(Item2).TplFileName);
 end;
 
-Function TZipFileHelper.ExtractToStream(var OutStream: TStream; Index: Integer): TTemplateFile;
+function TZipFileHelper.ExtractToStream(Index: Integer; const Path: string; CreateSubdirs: Boolean): TTemplateFile;
 var
-  LInStream: TStream;
+  LInStream, LOutStream: TStream;
   LHeader: TZipHeader;
   LDir, LFileName: string;
   LModifiedDateTime: TDateTime;
+
+  FCurrentHeader: TZipHeader;
+  FCurrentFile: String;
+
   Template: TTemplateFile;
   TemplateText: String;
-  FCurrentFile: String;
+  SS: TStringStream;
 
   // Not exposed by TZip.pas
   function WinFileDateToDateTime(FileDate: UInt32; out DateTime: TDateTime): Boolean;
@@ -105,6 +160,87 @@ var
   end;
 
 begin
+  // Get decompression stream for file
+  Read(Index, LInStream, LHeader);
+  FCurrentHeader := LHeader;
+  try
+    if not GetUTF8PathFromExtraField(LHeader, LFileName) then
+      LFileName := InternalGetFileName(Index);
+{$IFDEF MSWINDOWS} // ZIP stores files with '/', so translate to a relative Windows path.
+    LFileName := StringReplace(LFileName, '/', '\', [rfReplaceAll]);
+{$ENDIF}
+    // CreateSubDirs = False assumes the user passed in the path where they want the file to end up
+    if CreateSubdirs then
+      LFileName := TPath.Combine(Path, LFileName)
+    else
+      LFileName := TPath.Combine(Path, ExtractFileName(LFileName));
+    // Force directory creation
+    LDir := ExtractFileDir(LFileName);
+    if CreateSubdirs and (LDir <> '') then
+      TDirectory.CreateDirectory(ExtractFileDir(LFileName));
+    // Open the File For output
+    if LFileName.Chars[LFileName.Length-1] = PathDelim then
+      Exit; // Central Directory Entry points at a directory, not a file.
+    LOutStream := TFileStream.Create(LFileName, fmCreate);
+    try // And Copy from the decompression stream.
+      FCurrentFile := LFileName;
+      // See Bit 3 at http://www.pkware.com/documents/casestudies/APPNOTE.TXT
+      if (LHeader.Flag and (1 shl 3)) = 0 then
+      begin
+        // Empty files should not be read
+        if LHeader.UncompressedSize > 0 then
+          LOutStream.CopyFrom(LInStream, LHeader.UncompressedSize);
+      end
+      else
+      begin
+        LOutStream.CopyFrom(LInStream, LHeader.UncompressedSize);
+      end;
+    finally
+      if Assigned(LOutStream) then
+        begin
+          SS := TStringStream.Create;
+          SS.CopyFrom(LoutStream , 0);
+          TemplateText := SS.DataString;
+          Template := TTemplateFile.Create(FCurrentFile, TemplateText);
+          Result := Template;
+        end;
+      LOutStream.Free;
+      FCurrentFile := '';
+    end;
+
+    if FileExists(LFileName) then
+    begin
+      if WinFileDateToDateTime(LHeader.ModifiedDateTime, LModifiedDateTime) then
+      begin
+        TFile.SetCreationTime(LFileName, LModifiedDateTime);
+        TFile.SetLastWriteTime(LFileName, LModifiedDateTime);
+      end;
+{$IFDEF MSWINDOWS}
+      if (Hi(LHeader.MadeByVersion) = MADEBY_MSDOS) then
+        TFile.SetAttributes(LFileName, TFile.IntegerToFileAttributes(LHeader.ExternalAttributes and $000000FF));
+{$ENDIF}
+{$IFDEF POSIX}
+      if (Hi(FFiles[Index].MadeByVersion) = MADEBY_UNIX) and (FFiles[Index].ExternalAttributes shr 16 <> 0) then
+        TFile.SetAttributes(LFileName, TFile.IntegerToFileAttributes(FFiles[Index].ExternalAttributes shr 16));
+{$ENDIF}
+    end;
+  finally
+    FCurrentHeader := Default(TZipHeader);
+    LInStream.Free;
+  end;
+end;
+
+Function TZipFileHelper.ExtractToStream(var OutStream: TStream; Index: Integer): TTemplateFile;
+var
+  LInStream: TStream;
+  LHeader: TZipHeader;
+  LDir, LFileName: string;
+  LModifiedDateTime: TDateTime;
+  Template: TTemplateFile;
+  TemplateText: String;
+  FCurrentFile: String;
+  SS: TStringStream;
+begin
   Template := Nil;
   // Get decompression stream for file
   Read(Index, LInStream, LHeader);
@@ -117,6 +253,9 @@ begin
     // Open the File For output
     if LFileName.Chars[LFileName.Length-1] = PathDelim then
       Exit(Nil); // Central Directory Entry points at a directory, not a file.
+
+    SS := TStringStream.Create;
+
     try // And Copy from the decompression stream.
       FCurrentFile := LFileName;
       // See Bit 3 at http://www.pkware.com/documents/casestudies/APPNOTE.TXT
@@ -125,19 +264,22 @@ begin
         // Empty files should not be read
         if LHeader.UncompressedSize > 0 then
           begin
-            SetString(TemplateText, PChar(LInStream), LHeader.UncompressedSize);
+            SS.CopyFrom(LInStream , 0);
+            TemplateText := SS.DataString;
             Template := TTemplateFile.Create(FCurrentFile, TemplateText);
           end;
       end
       else
       begin
-        SetString(TemplateText, PChar(LInStream), LHeader.UncompressedSize);
+        SS.CopyFrom(LInStream , 0);
+        TemplateText := SS.DataString;
         Template := TTemplateFile.Create(FCurrentFile, TemplateText);
       end;
     finally
       FCurrentFile := '';
     end;
   finally
+  //  LOutStream.Free;
     LInStream.Free;
     Result := Template;
   end;
@@ -146,7 +288,7 @@ end;
 
 procedure TMainForm.Log(const AMsg: String);
 begin
-  Memo1.Lines.Add(AMsg);
+  mmoReadMe.Lines.Add(AMsg);
 end;
 
 procedure TMainForm.Button2Click(Sender: TObject);
@@ -180,11 +322,15 @@ begin
 
       for I := 0 to ZipCount - 1 do
         begin
+{$IFNDEF EXTRACTTOSTREAM}
+          z.ExtractToStream(i, 'extract', True);
+{$ELSE}
           Template := z.ExtractToStream(OutStream, i);
           if not (Template = Nil) then
             begin
               TemplateList.Add(Template);
             end;
+{$ENDIF}
         end;
 
     except
@@ -198,6 +344,7 @@ begin
   finally
     z.Free;
     LResStream.Free;
+{$IFDEF EXTRACTTOSTREAM}
     if Assigned(TemplateList) then
       begin
         TemplateList.Sort(@TemplateSortFunc);
@@ -208,6 +355,9 @@ begin
             Log(Template.TplFileName);
           end;
       end;
+      Template := TemplateList[2];
+      DecodeBossJson(Template.TplTemplate);
+{$ENDIF}
   end;
 end;
 
@@ -220,11 +370,12 @@ end;
 procedure TMainForm.ExtractTemplate;
 begin
   ExtractTemplateResourceZip;
+{$IFDEF EXTRACTTOSTREAM}
   if Not Assigned(TemplateList) then
     HaltAndCatchFire;
   if Not TemplateList.Count = 0 then
     HaltAndCatchFire;
-
+{$ENDIF}
   Log('Extracted Template');
   Button1.Text := 'Close';
   Button1.Enabled := True;
@@ -269,7 +420,7 @@ begin
         DownPath := '';
     end;
 
-  OpenDialog1.Filter:='Lartis Style Archives (*.lartis.zip)|*.lartis.zip';
+  OpenDialog1.Filter:='Component Project Files (*.cpf)|*.cpf';
   OpenDialog1.InitialDir := DownPath;
 end;
 

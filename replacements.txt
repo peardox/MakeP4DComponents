@@ -2,6 +2,10 @@ const
 __P4D__ : always P4D
 __DCL__ : always DCL
 
+readme.md
+__PROJECT_TITLE__ : Tile of this project for README.md
+__README__ : The text of the README.md
+
 group vars
 __PROJECT_GROUP_NAME__ : e.g. PythonPackages4Delphi
 __PROJECT_HOMEPAGE__ : e.g. https://github.com/Embarcadero/PythonPackages4Delphi
@@ -22,6 +26,24 @@ __PACKAGE_GUID__ : Random GUID
 images
 __COMPONENT__.bmp x 4
 __COMPONENT__.png x 4
+
+for boss.json (not being json)
+__PROJECTS__ : e.g. ...
+		"./src/Boto3/dclP4DBoto3.dproj",
+		"./src/Boto3/P4DBoto3.dproj",
+		"./src/H5Py/dclP4DH5Py.dproj",
+		"./src/H5Py/P4DH5Py.dproj",
+		"./src/MoviePy/dclP4DMoviePy.dproj",
+		"./src/MoviePy/P4DMoviePy.dproj",
+		"./src/Pillow/dclP4DPillow.dproj",
+		"./src/Pillow/P4DPillow.dproj",
+		"./src/PSUtil/dclP4DPSUtil.dproj",
+		"./src/PSUtil/P4DPSUtil.dproj",
+		"./src/PyQT5/dclP4DPyQT5.dproj",
+		"./src/PyQT5/P4DPyQT5.dproj",
+		"./src/RemBG/dclP4DRemBG.dproj",
+		"./src/RemBG/P4DRemBG.dproj"
+
 
 template files (alpha sorted)
 .gitignore
