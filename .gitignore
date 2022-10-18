@@ -1,4 +1,3 @@
-!EmbeddedResources.RES
 # Delphi compiler-generated binaries (safe to delete)
 *.exe
 *.dll
@@ -48,3 +47,4 @@ Linux64/
 
 # Boss dependency manager vendor folder https://github.com/HashLoad/boss
 modules/
+!/EmbeddedResources.RES
