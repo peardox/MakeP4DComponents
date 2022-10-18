@@ -2,6 +2,8 @@
 
 Provides a user-freindly 'Wizard' to allow the creation of Delphi Components for the P4D projects
 
+Make sure you "brcc32 EmbeddedResources.rc" before trying to build
+
 Supporting the following projects (with special note to the last two)
 
 https://github.com/Embarcadero/python4delphi
