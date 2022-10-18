@@ -2,7 +2,8 @@
 
 Provides a user-freindly 'Wizard' to allow the creation of Delphi Components for the P4D projects
 
-See:
+Supporting the following projects (with special note to the last two)
+
 https://github.com/Embarcadero/python4delphi
 
 https://github.com/Embarcadero/PythonEnviroments
