@@ -2,8 +2,8 @@ object MainForm: TMainForm
   Left = 0
   Top = 0
   Caption = 'Form1'
-  ClientHeight = 614
-  ClientWidth = 957
+  ClientHeight = 489
+  ClientWidth = 878
   Position = DesktopCenter
   FormFactor.Width = 320
   FormFactor.Height = 480
@@ -17,44 +17,38 @@ object MainForm: TMainForm
   end
   object Panel1: TPanel
     Align = Bottom
-    Position.Y = 582.000000000000000000
-    Size.Width = 957.000000000000000000
+    Position.Y = 457.000000000000000000
+    Size.Width = 878.000000000000000000
     Size.Height = 32.000000000000000000
     Size.PlatformDefault = False
     TabOrder = 1
-    object Button1: TButton
+    object btnAddComponent: TButton
       Anchors = [akTop, akRight]
-      Position.X = 854.000000000000000000
+      Position.X = 760.000000000000000000
       Position.Y = 6.000000000000000000
-      Size.Width = 96.000000000000000000
+      Size.Width = 111.000000000000000000
       Size.Height = 22.000000000000000000
       Size.PlatformDefault = False
       TabOrder = 0
-      Text = 'Import'
-      OnClick = Button1Click
-    end
-    object Button2: TButton
-      Position.X = 8.000000000000000000
-      Position.Y = 6.000000000000000000
-      TabOrder = 2
-      Text = 'Cancel'
-      OnClick = Button2Click
+      Text = 'Add Component'
+      OnClick = btnAddComponentClick
     end
   end
   object mmoReadMe: TMemo
     Touch.InteractiveGestures = [Pan, LongTap, DoubleTap]
     DataDetectorTypes = []
-    Position.Y = 76.000000000000000000
-    Size.Width = 957.000000000000000000
+    Align = Horizontal
+    Position.Y = 52.000000000000000000
+    Size.Width = 878.000000000000000000
     Size.Height = 106.000000000000000000
     Size.PlatformDefault = False
     TabOrder = 4
-    Viewport.Width = 953.000000000000000000
+    Viewport.Width = 874.000000000000000000
     Viewport.Height = 102.000000000000000000
   end
   object lblProjectTitle: TLabel
     Position.X = 8.000000000000000000
-    Position.Y = 32.000000000000000000
+    Position.Y = 8.000000000000000000
     Size.Width = 209.000000000000000000
     Size.Height = 17.000000000000000000
     Size.PlatformDefault = False
@@ -65,20 +59,20 @@ object MainForm: TMainForm
     Touch.InteractiveGestures = [LongTap, DoubleTap]
     TabOrder = 7
     Position.X = 224.000000000000000000
-    Position.Y = 32.000000000000000000
-    Size.Width = 537.000000000000000000
+    Position.Y = 8.000000000000000000
+    Size.Width = 433.000000000000000000
     Size.Height = 22.000000000000000000
     Size.PlatformDefault = False
   end
   object lblReadMe: TLabel
     Position.X = 8.000000000000000000
-    Position.Y = 56.000000000000000000
+    Position.Y = 32.000000000000000000
     Text = 'README.md Text'
     TabOrder = 8
   end
   object lblProjectGroupName: TLabel
     Position.X = 8.000000000000000000
-    Position.Y = 192.000000000000000000
+    Position.Y = 168.000000000000000000
     Text = 'Project Group Name'
     TabOrder = 19
   end
@@ -86,20 +80,20 @@ object MainForm: TMainForm
     Touch.InteractiveGestures = [LongTap, DoubleTap]
     TabOrder = 20
     Position.X = 144.000000000000000000
-    Position.Y = 192.000000000000000000
+    Position.Y = 168.000000000000000000
     Size.Width = 257.000000000000000000
     Size.Height = 22.000000000000000000
     Size.PlatformDefault = False
   end
   object lblProjectGroupNameExt: TLabel
     Position.X = 408.000000000000000000
-    Position.Y = 196.000000000000000000
+    Position.Y = 172.000000000000000000
     Text = '.groupproj'
     TabOrder = 21
   end
   object lblProjectHomepage: TLabel
     Position.X = 8.000000000000000000
-    Position.Y = 232.000000000000000000
+    Position.Y = 208.000000000000000000
     Text = 'Project Homepage'
     TabOrder = 17
   end
@@ -107,72 +101,85 @@ object MainForm: TMainForm
     Touch.InteractiveGestures = [LongTap, DoubleTap]
     TabOrder = 18
     Position.X = 144.000000000000000000
-    Position.Y = 232.000000000000000000
+    Position.Y = 208.000000000000000000
     Size.Width = 257.000000000000000000
     Size.Height = 22.000000000000000000
     Size.PlatformDefault = False
   end
   object lblProjectDesc: TLabel
-    Position.X = 8.000000000000000000
-    Position.Y = 272.000000000000000000
+    Anchors = [akTop, akRight]
+    Position.X = 481.000000000000000000
+    Position.Y = 168.000000000000000000
     Text = 'Project Description'
     TabOrder = 15
   end
   object edtProjectDesc: TEdit
     Touch.InteractiveGestures = [LongTap, DoubleTap]
+    Anchors = [akTop, akRight]
     TabOrder = 16
-    Position.X = 144.000000000000000000
-    Position.Y = 272.000000000000000000
+    Position.X = 617.000000000000000000
+    Position.Y = 168.000000000000000000
     Size.Width = 257.000000000000000000
     Size.Height = 22.000000000000000000
     Size.PlatformDefault = False
   end
   object lblProjectVersion: TLabel
-    Position.X = 8.000000000000000000
-    Position.Y = 312.000000000000000000
+    Anchors = [akTop, akRight]
+    Position.X = 713.000000000000000000
+    Position.Y = 8.000000000000000000
+    Size.Width = 89.000000000000000000
+    Size.Height = 17.000000000000000000
+    Size.PlatformDefault = False
     Text = 'Project Version'
     TabOrder = 13
   end
   object edtProjectVersion: TEdit
     Touch.InteractiveGestures = [LongTap, DoubleTap]
+    Anchors = [akTop, akRight]
     TabOrder = 14
-    Position.X = 144.000000000000000000
-    Position.Y = 312.000000000000000000
+    Position.X = 809.000000000000000000
+    Position.Y = 8.000000000000000000
     Size.Width = 57.000000000000000000
     Size.Height = 22.000000000000000000
     Size.PlatformDefault = False
   end
   object edtPalettePage: TLabel
-    Position.X = 8.000000000000000000
-    Position.Y = 352.000000000000000000
+    Anchors = [akTop, akRight]
+    Position.X = 481.000000000000000000
+    Position.Y = 208.000000000000000000
     Text = 'Delphi Palette Page'
     TabOrder = 11
   end
   object Edit4: TEdit
     Touch.InteractiveGestures = [LongTap, DoubleTap]
+    Anchors = [akTop, akRight]
     TabOrder = 12
-    Position.X = 144.000000000000000000
-    Position.Y = 352.000000000000000000
+    Position.X = 617.000000000000000000
+    Position.Y = 208.000000000000000000
     Size.Width = 257.000000000000000000
     Size.Height = 22.000000000000000000
     Size.PlatformDefault = False
   end
   object lblComponents: TLabel
-    Position.X = 8.000000000000000000
-    Position.Y = 384.000000000000000000
+    Align = Bottom
+    Position.Y = 233.000000000000000000
+    Size.Width = 878.000000000000000000
+    Size.Height = 24.000000000000000000
+    Size.PlatformDefault = False
+    TextSettings.HorzAlign = Center
     Text = 'Components'
     TabOrder = 10
   end
   object StringGrid1: TStringGrid
+    Align = Bottom
     CanFocus = True
     ClipChildren = True
-    Position.X = 8.000000000000000000
-    Position.Y = 408.000000000000000000
-    Size.Width = 937.000000000000000000
-    Size.Height = 169.000000000000000000
+    Position.Y = 257.000000000000000000
+    Size.Width = 878.000000000000000000
+    Size.Height = 200.000000000000000000
     Size.PlatformDefault = False
     TabOrder = 22
-    Viewport.Width = 933.000000000000000000
-    Viewport.Height = 144.000000000000000000
+    Viewport.Width = 874.000000000000000000
+    Viewport.Height = 175.000000000000000000
   end
 end
