@@ -3,7 +3,12 @@ __P4D__ : always P4D
 __DCL__ : always DCL
 
 group vars
-__PALETTE_PAGE__  : eg P4D Data Sciences
+__PROJECT_GROUP_NAME__ : e.g. PythonPackages4Delphi
+__PROJECT_HOMEPAGE__ : e.g. https://github.com/Embarcadero/PythonPackages4Delphi
+__PROJECT_DESCRIPTION__ : e.g. General collection of Python Packages wrapped for use in Delphi and C++Builder
+__PROJECT_VERSION__ : e.g. 1.0.0
+__PALETTE_PAGE__  : e.g. P4D Data Sciences
+
 
 component vars
 __COMPONENT__ : eg H5Py
@@ -13,3 +18,22 @@ __PACKAGE_NAME_PIP__ : e.g. h5py
 __PACKAGE_NAME_CONDA__ : e.g. h5py
 __PALETTE_GUID__ : Random GUID
 __PACKAGE_GUID__ : Random GUID
+
+images
+__COMPONENT__.bmp x 4
+__COMPONENT__.png x 4
+
+template files (alpha sorted)
+.gitignore
+boss-lock.json
+boss.json
+LICENSE
+__PROJECT_GROUP_NAME__.groupproj
+__PROJECT_GROUP_NAME__.prjmgc
+README.md
+src\__COMPONENT__\__COMPONENT__.pas
+src\__COMPONENT__\__COMPONENT__Reg.pas
+src\__COMPONENT__\__DCL____P4D____COMPONENT__.dpk
+src\__COMPONENT__\__DCL____P4D____COMPONENT__.dproj
+src\__COMPONENT__\__P4D____COMPONENT__.dpk
+src\__COMPONENT__\__P4D____COMPONENT__.dproj
