@@ -1,3 +1,3 @@
-P4DIcon	BMP	"p4d-icon.bmp"
+P4DIcon	RCDATA	"p4d-icon.bmp"
 Template RCDATA "template.zip"
 ReplacementTokens RCDATA "replacement.json"

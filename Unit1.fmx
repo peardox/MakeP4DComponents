@@ -1,9 +1,11 @@
 object MainForm: TMainForm
   Left = 0
   Top = 0
-  Caption = 'Form1'
-  ClientHeight = 489
-  ClientWidth = 878
+  BorderIcons = [biSystemMenu, biMinimize]
+  BorderStyle = Single
+  Caption = 'P4D Component Creation Tool'
+  ClientHeight = 617
+  ClientWidth = 880
   Position = DesktopCenter
   FormFactor.Width = 320
   FormFactor.Height = 480
@@ -17,20 +19,20 @@ object MainForm: TMainForm
   end
   object Panel1: TPanel
     Align = Bottom
-    Position.Y = 457.000000000000000000
-    Size.Width = 878.000000000000000000
+    Position.Y = 585.000000000000000000
+    Size.Width = 880.000000000000000000
     Size.Height = 32.000000000000000000
     Size.PlatformDefault = False
-    TabOrder = 1
+    TabOrder = 7
     object btnAddComponent: TButton
       Anchors = [akTop, akRight]
-      Position.X = 760.000000000000000000
+      Position.X = 762.000000000000000000
       Position.Y = 6.000000000000000000
       Size.Width = 111.000000000000000000
       Size.Height = 22.000000000000000000
       Size.PlatformDefault = False
-      TabOrder = 0
-      Text = 'Add Component'
+      TabOrder = 6
+      Text = 'Add Package'
       OnClick = btnAddComponentClick
     end
   end
@@ -39,12 +41,12 @@ object MainForm: TMainForm
     DataDetectorTypes = []
     Align = Horizontal
     Position.Y = 52.000000000000000000
-    Size.Width = 878.000000000000000000
+    Size.Width = 880.000000000000000000
     Size.Height = 106.000000000000000000
     Size.PlatformDefault = False
-    TabOrder = 4
-    Viewport.Width = 874.000000000000000000
-    Viewport.Height = 102.000000000000000000
+    TabOrder = 2
+    Viewport.Width = 880.000000000000000000
+    Viewport.Height = 106.000000000000000000
   end
   object lblProjectTitle: TLabel
     Position.X = 8.000000000000000000
@@ -53,11 +55,11 @@ object MainForm: TMainForm
     Size.Height = 17.000000000000000000
     Size.PlatformDefault = False
     Text = 'Project Title (header in README.md)'
-    TabOrder = 6
+    TabOrder = 11
   end
   object edtProjectTitle: TEdit
     Touch.InteractiveGestures = [LongTap, DoubleTap]
-    TabOrder = 7
+    TabOrder = 0
     Position.X = 224.000000000000000000
     Position.Y = 8.000000000000000000
     Size.Width = 433.000000000000000000
@@ -68,7 +70,7 @@ object MainForm: TMainForm
     Position.X = 8.000000000000000000
     Position.Y = 32.000000000000000000
     Text = 'README.md Text'
-    TabOrder = 8
+    TabOrder = 12
   end
   object lblProjectGroupName: TLabel
     Position.X = 8.000000000000000000
@@ -78,7 +80,7 @@ object MainForm: TMainForm
   end
   object edtProjectGroupName: TEdit
     Touch.InteractiveGestures = [LongTap, DoubleTap]
-    TabOrder = 20
+    TabOrder = 3
     Position.X = 144.000000000000000000
     Position.Y = 168.000000000000000000
     Size.Width = 257.000000000000000000
@@ -89,17 +91,17 @@ object MainForm: TMainForm
     Position.X = 408.000000000000000000
     Position.Y = 172.000000000000000000
     Text = '.groupproj'
-    TabOrder = 21
+    TabOrder = 20
   end
   object lblProjectHomepage: TLabel
     Position.X = 8.000000000000000000
     Position.Y = 208.000000000000000000
     Text = 'Project Homepage'
-    TabOrder = 17
+    TabOrder = 18
   end
   object edtProjectHomepage: TEdit
     Touch.InteractiveGestures = [LongTap, DoubleTap]
-    TabOrder = 18
+    TabOrder = 5
     Position.X = 144.000000000000000000
     Position.Y = 208.000000000000000000
     Size.Width = 257.000000000000000000
@@ -108,16 +110,16 @@ object MainForm: TMainForm
   end
   object lblProjectDesc: TLabel
     Anchors = [akTop, akRight]
-    Position.X = 481.000000000000000000
+    Position.X = 483.000000000000000000
     Position.Y = 168.000000000000000000
     Text = 'Project Description'
-    TabOrder = 15
+    TabOrder = 17
   end
   object edtProjectDesc: TEdit
     Touch.InteractiveGestures = [LongTap, DoubleTap]
     Anchors = [akTop, akRight]
-    TabOrder = 16
-    Position.X = 617.000000000000000000
+    TabOrder = 4
+    Position.X = 619.000000000000000000
     Position.Y = 168.000000000000000000
     Size.Width = 257.000000000000000000
     Size.Height = 22.000000000000000000
@@ -125,36 +127,36 @@ object MainForm: TMainForm
   end
   object lblProjectVersion: TLabel
     Anchors = [akTop, akRight]
-    Position.X = 713.000000000000000000
+    Position.X = 715.000000000000000000
     Position.Y = 8.000000000000000000
     Size.Width = 89.000000000000000000
     Size.Height = 17.000000000000000000
     Size.PlatformDefault = False
     Text = 'Project Version'
-    TabOrder = 13
+    TabOrder = 16
   end
   object edtProjectVersion: TEdit
     Touch.InteractiveGestures = [LongTap, DoubleTap]
     Anchors = [akTop, akRight]
-    TabOrder = 14
-    Position.X = 809.000000000000000000
+    TabOrder = 1
+    Position.X = 811.000000000000000000
     Position.Y = 8.000000000000000000
     Size.Width = 57.000000000000000000
     Size.Height = 22.000000000000000000
     Size.PlatformDefault = False
   end
-  object edtPalettePage: TLabel
+  object lblPalettePage: TLabel
     Anchors = [akTop, akRight]
-    Position.X = 481.000000000000000000
+    Position.X = 483.000000000000000000
     Position.Y = 208.000000000000000000
     Text = 'Delphi Palette Page'
-    TabOrder = 11
+    TabOrder = 15
   end
-  object Edit4: TEdit
+  object edtPalettePage: TEdit
     Touch.InteractiveGestures = [LongTap, DoubleTap]
     Anchors = [akTop, akRight]
-    TabOrder = 12
-    Position.X = 617.000000000000000000
+    TabOrder = 6
+    Position.X = 619.000000000000000000
     Position.Y = 208.000000000000000000
     Size.Width = 257.000000000000000000
     Size.Height = 22.000000000000000000
@@ -162,24 +164,46 @@ object MainForm: TMainForm
   end
   object lblComponents: TLabel
     Align = Bottom
-    Position.Y = 233.000000000000000000
-    Size.Width = 878.000000000000000000
+    HelpContext = -1
+    Position.Y = 257.000000000000000000
+    Size.Width = 880.000000000000000000
     Size.Height = 24.000000000000000000
     Size.PlatformDefault = False
     TextSettings.HorzAlign = Center
     Text = 'Components'
-    TabOrder = 10
+    TabOrder = 14
   end
-  object StringGrid1: TStringGrid
+  object Rectangle1: TRectangle
     Align = Bottom
-    CanFocus = True
-    ClipChildren = True
-    Position.Y = 257.000000000000000000
-    Size.Width = 878.000000000000000000
-    Size.Height = 200.000000000000000000
+    Position.Y = 281.000000000000000000
+    Size.Width = 880.000000000000000000
+    Size.Height = 304.000000000000000000
     Size.PlatformDefault = False
-    TabOrder = 22
-    Viewport.Width = 874.000000000000000000
-    Viewport.Height = 175.000000000000000000
+  end
+  object Rectangle2: TRectangle
+    Align = Horizontal
+    Position.Y = 236.000000000000000000
+    Size.Width = 880.000000000000000000
+    Size.Height = 4.000000000000000000
+    Size.PlatformDefault = False
+  end
+  object MainMenu1: TMainMenu
+    Left = 288
+    Top = 96
+    object MenuItem1: TMenuItem
+      Text = 'File'
+      object MenuItem2: TMenuItem
+        Locked = True
+        Text = 'Open'
+      end
+      object MenuItem3: TMenuItem
+        Locked = True
+        Text = 'Save'
+      end
+      object MenuItem4: TMenuItem
+        Locked = True
+        Text = 'Exit'
+      end
+    end
   end
 end

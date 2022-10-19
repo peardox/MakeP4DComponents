@@ -7,7 +7,7 @@ uses
   FMX.Types, FMX.Controls, FMX.Forms, FMX.Graphics, FMX.Dialogs, FMX.Memo.Types,
   System.Zip, FMX.Controls.Presentation, FMX.ScrollBox, FMX.Memo, FMX.StdCtrls,
   PyCommon, PyModule, PyPackage, H5Py, FMX.Edit, System.Rtti, FMX.Grid.Style,
-  FMX.Grid;
+  FMX.Grid, FMX.Menus, FMX.Objects;
 
 type
   TTemplateFile = Class
@@ -15,6 +15,13 @@ type
     TplTemplate: String;
     constructor Create(AFileName: string; ATemplate: String);
   End;
+
+  TReplacementToken = Class
+    tfile: String;
+    xlat: TArray<String>;
+    constructor Create(AFile: string; AToken: TArray<String>);
+  end;
+  TReplacementTokens = TArray<TReplacementToken>;
 
   TZipFileHelper = class helper for TZipFile
     function ExtractToTemplate(Index: Integer): TTemplateFile; overload;
@@ -37,12 +44,19 @@ type
     edtProjectDesc: TEdit;
     lblProjectVersion: TLabel;
     edtProjectVersion: TEdit;
-    edtPalettePage: TLabel;
-    Edit4: TEdit;
+    lblPalettePage: TLabel;
+    edtPalettePage: TEdit;
     lblComponents: TLabel;
-    StringGrid1: TStringGrid;
+    Rectangle1: TRectangle;
+    Rectangle2: TRectangle;
+    MainMenu1: TMainMenu;
+    MenuItem1: TMenuItem;
+    MenuItem2: TMenuItem;
+    MenuItem3: TMenuItem;
+    MenuItem4: TMenuItem;
     procedure btnAddComponentClick(Sender: TObject);
     procedure ExtractTemplateResourceZip;
+    procedure ExtractReplacementResourceJson;
     procedure ExtractTemplate;
     procedure FormCreate(Sender: TObject);
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
@@ -50,7 +64,9 @@ type
   private
     { Private declarations }
     TemplateList: TList;
-    procedure FreeList;
+    ReplacementList: TList;
+    procedure FreeTemplateList;
+    procedure FreeReplacementList;
     procedure Log(const AMsg: String);
     procedure HaltAndCatchFire;
   public
@@ -67,8 +83,19 @@ implementation
 {$R EmbeddedResources.RES}
 
 uses
+  Unit2,
   Math,
+  System.Json,
+  System.Json.Serializers,
+  System.Json.Types,
+  System.Json.Readers,
   System.IOUtils;
+
+constructor TReplacementToken.Create(AFile: string; AToken: TArray<String>);
+begin
+  tfile := AFile;
+  xlat := AToken;
+end;
 
 constructor TTemplateFile.Create(AFileName: string; ATemplate: String);
 begin
@@ -80,6 +107,11 @@ end;
 function TemplateSortFunc(Item1, Item2: Pointer): Integer;
 begin
   Result := CompareText(TTemplateFile(Item1).TplFileName, TTemplateFile(Item2).TplFileName);
+end;
+
+function TokenSortFunc(Item1, Item2: Pointer): Integer;
+begin
+  Result := CompareText(TReplacementToken(Item1).tfile, TReplacementToken(Item2).tfile);
 end;
 
 Function TZipFileHelper.ExtractToTemplate(Index: Integer): TTemplateFile;
@@ -144,6 +176,68 @@ begin
   mmoReadMe.Lines.Add(AMsg);
 end;
 
+procedure TMainForm.ExtractReplacementResourceJson;
+var
+  LResStream: TResourceStream;
+  SS: TStringStream;
+  Tokens: TReplacementTokens;
+  Token: TReplacementToken;
+  JSONText: String;
+  lSerializer: TJsonSerializer;
+  I, J: Integer;
+begin
+  try
+    LResStream := TResourceStream.Create(HInstance, 'ReplacementTokens', RT_RCDATA);
+    lSerializer := TJsonSerializer.Create;
+    SS := TStringStream.Create;
+    SS.CopyFrom(LResStream , 0);
+
+    JSONText := SS.DataString;
+    try
+      Tokens :=  lSerializer.Deserialize<TReplacementTokens>(JSONText);
+
+      if Assigned(ReplacementList) then
+        FreeReplacementList;
+      ReplacementList := TList.Create;
+
+      for I := 0 to Length(Tokens) - 1 do
+        begin
+          Token := Tokens[I];
+          ReplacementList.Add(Token);
+        end;
+
+    except
+      on E : Exception do
+      begin
+        ShowMessage('Unhandled Exception in ExtractReplacementResourceJson' + sLineBreak
+          + 'Exception class name = '+E.ClassName + sLineBreak
+          + 'Exception message = '+E.Message + sLineBreak
+          + JSONText);
+      end;
+    end;
+  finally
+    if Assigned(TemplateList) then
+      begin
+        ReplacementList.Sort(@TokenSortFunc);
+        Log('Replacemnts = ' + IntToStr(ReplacementList.Count));
+        for I := 0 to ReplacementList.Count -1 do
+          begin
+            Token := ReplacementList[I];
+            Log(IntToStr(I) + ' : ' + Token.tfile);
+            for J := 0 to Length(Token.xlat) -1 do
+              begin
+                Log('  + ' + Token.xlat[J]);
+              end;
+          end;
+      end;
+  end;
+
+  lSerializer.Free;
+  SS.Free;
+  LResStream.Free;
+
+end;
+
 procedure TMainForm.ExtractTemplateResourceZip;
 var
   z: TZipFile;
@@ -161,10 +255,9 @@ begin
 
 
       ZipCount := Length(z.FileNames);
-      Log('Files = ' + IntToStr(ZipCount));
 
       if Assigned(TemplateList) then
-        FreeList;
+        FreeTemplateList;
       TemplateList := TList.Create;
 
       for I := 0 to ZipCount - 1 do
@@ -177,13 +270,13 @@ begin
         end;
 
       z.Free;
-    LResStream.Free;
+      LResStream.Free;
     except
       on E: Exception do
         begin
-          Log('Unhandled Exception in ExtractTemplateResourceZip');
-          Log('Class : ' + E.ClassName);
-          Log('Error : ' + E.Message);
+        ShowMessage('Unhandled Exception in ExtractTemplateResourceZip' + sLineBreak
+          + 'Exception class name = '+E.ClassName + sLineBreak
+          + 'Exception message = '+E.Message);
         end;
     end;
   finally
@@ -194,7 +287,7 @@ begin
         for I := 0 to TemplateList.Count -1 do
           begin
             Template := TemplateList[I];
-            Log(Template.TplFileName);
+            Log(IntToStr(I) + ' : ' + Template.TplFileName);
           end;
       end;
   end;
@@ -213,12 +306,20 @@ begin
     HaltAndCatchFire;
   if Not TemplateList.Count = 0 then
     HaltAndCatchFire;
-  Log('Extracted Template');
+   ExtractReplacementResourceJson;
 end;
 
 procedure TMainForm.btnAddComponentClick(Sender: TObject);
+var
+  mr: TModalResult;
 begin
-  ExtractTemplate;
+  Form2.ModalResult := mrNone;
+  Form2.LoadDefaults;
+  mr := Form2.ShowModal;
+  if mr = mrOK then
+    begin
+
+    end;
 end;
 
 procedure TMainForm.FormClose(Sender: TObject; var Action: TCloseAction);
@@ -233,7 +334,7 @@ var
   DocPath: String;
 begin
   AppHome := '.';
-  Log('Import a Python Template');
+  ExtractTemplate;
   DocPath := TPath.GetDocumentsPath;
   DownPath := ExpandFileName(TPath.Combine(TPath.Combine(DocPath, '..'), 'Downloads'));
   if not DirectoryExists(DownPath) then
@@ -251,10 +352,11 @@ end;
 // Tidy up after ourselves
 procedure TMainForm.FormDestroy(Sender: TObject);
 begin
-  FreeList;
+  FreeTemplateList;
+  FreeReplacementList;
 end;
 
-procedure TMainForm.FreeList;
+procedure TMainForm.FreeTemplateList;
 var
   I: Integer;
   Template: TTemplateFile;
@@ -267,6 +369,22 @@ begin
             Template.Free;
           end;
         FreeAndNil(TemplateList);
+      end;
+end;
+
+procedure TMainForm.FreeReplacementList;
+var
+  I: Integer;
+  Token: TReplacementToken;
+begin
+    if Assigned(ReplacementList) then
+      begin
+        for I := 0 to ReplacementList.Count -1 do
+          begin
+            Token := ReplacementList[I];
+            Token.Free;
+          end;
+        FreeAndNil(ReplacementList);
       end;
 end;
 
