@@ -1,4 +1,4 @@
-unit Unit1;
+unit ProjectUnit;
 
 interface
 
@@ -66,6 +66,7 @@ type
     TemplateList: TList;
     ReplacementList: TList;
     AppHome: String;
+    Settings: TProjectSettings;
     procedure FreeTemplateList;
     procedure FreeReplacementList;
     procedure Log(const AMsg: String);
@@ -306,9 +307,9 @@ procedure TMainForm.btnAddComponentClick(Sender: TObject);
 var
   mr: TModalResult;
 begin
-  Form2.ModalResult := mrNone;
-  Form2.LoadDefaults;
-  mr := Form2.ShowModal;
+  ComponentForm.ModalResult := mrNone;
+  ComponentForm.LoadDefaults;
+  mr := ComponentForm.ShowModal;
   if mr = mrOK then
     begin
 

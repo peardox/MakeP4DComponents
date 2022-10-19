@@ -1,0 +1,213 @@
+object ComponentForm: TComponentForm
+  Left = 0
+  Top = 0
+  BorderIcons = []
+  BorderStyle = Single
+  Caption = 'Add New Package'
+  ClientHeight = 382
+  ClientWidth = 640
+  Position = OwnerFormCenter
+  FormFactor.Width = 320
+  FormFactor.Height = 480
+  FormFactor.Devices = [Desktop]
+  DesignerMasterStyle = 0
+  object Panel1: TPanel
+    Align = Bottom
+    Position.Y = 342.000000000000000000
+    Size.Width = 640.000000000000000000
+    Size.Height = 40.000000000000000000
+    Size.PlatformDefault = False
+    TabOrder = 0
+    object btnCancel: TButton
+      Position.X = 16.000000000000000000
+      Position.Y = 10.000000000000000000
+      TabOrder = 0
+      TabStop = False
+      Text = 'Cancel'
+      OnClick = btnCancelClick
+    end
+    object btnSave: TButton
+      Anchors = [akTop, akRight]
+      Position.X = 544.000000000000000000
+      Position.Y = 10.000000000000000000
+      TabOrder = 1
+      Text = 'Save'
+      OnClick = btnSaveClick
+    end
+  end
+  object imgIcon: TImage
+    MultiResBitmap = <
+      item
+      end>
+    Anchors = [akTop, akRight]
+    Position.X = 496.000000000000000000
+    Position.Y = 16.000000000000000000
+    Size.Width = 128.000000000000000000
+    Size.Height = 128.000000000000000000
+    Size.PlatformDefault = False
+  end
+  object Label1: TLabel
+    Anchors = [akTop, akRight]
+    Position.X = 504.000000000000000000
+    Position.Y = 152.000000000000000000
+    TextSettings.HorzAlign = Center
+    Text = 'Package Icon'
+    TabOrder = 3
+  end
+  object Label2: TLabel
+    Anchors = [akTop, akRight]
+    Position.X = 504.000000000000000000
+    Position.Y = 168.000000000000000000
+    TextSettings.HorzAlign = Center
+    Text = '(128 x 128)'
+    TabOrder = 2
+  end
+  object lblDelphiPackageName: TLabel
+    Position.X = 16.000000000000000000
+    Position.Y = 16.000000000000000000
+    Text = 'Delphi Class Name'
+    TabOrder = 19
+  end
+  object edtDelphiPackageName: TEdit
+    Touch.InteractiveGestures = [LongTap, DoubleTap]
+    TabOrder = 20
+    Position.X = 160.000000000000000000
+    Position.Y = 16.000000000000000000
+    Size.Width = 97.000000000000000000
+    Size.Height = 22.000000000000000000
+    Size.PlatformDefault = False
+  end
+  object lblDelphiPublicName: TLabel
+    Position.X = 16.000000000000000000
+    Position.Y = 56.000000000000000000
+    Text = 'Property Name'
+    TabOrder = 14
+  end
+  object edtPublicPackageName: TEdit
+    Touch.InteractiveGestures = [LongTap, DoubleTap]
+    TabOrder = 18
+    Position.X = 152.000000000000000000
+    Position.Y = 56.000000000000000000
+    Size.Width = 106.000000000000000000
+    Size.Height = 22.000000000000000000
+    Size.PlatformDefault = False
+  end
+  object edtPythonPackageName: TEdit
+    Touch.InteractiveGestures = [LongTap, DoubleTap]
+    TabOrder = 17
+    Position.X = 152.000000000000000000
+    Position.Y = 96.000000000000000000
+    Size.Width = 329.000000000000000000
+    Size.Height = 22.000000000000000000
+    Size.PlatformDefault = False
+  end
+  object lblPythonPackageName: TLabel
+    Position.X = 16.000000000000000000
+    Position.Y = 96.000000000000000000
+    Size.Width = 137.000000000000000000
+    Size.Height = 17.000000000000000000
+    Size.PlatformDefault = False
+    Text = 'Package Name (Python)'
+    TabOrder = 10
+  end
+  object edtPIPPackageName: TEdit
+    Touch.InteractiveGestures = [LongTap, DoubleTap]
+    TabOrder = 16
+    Position.X = 152.000000000000000000
+    Position.Y = 136.000000000000000000
+    Size.Width = 329.000000000000000000
+    Size.Height = 22.000000000000000000
+    Size.PlatformDefault = False
+  end
+  object lblPIPPackageName: TLabel
+    Position.X = 16.000000000000000000
+    Position.Y = 136.000000000000000000
+    Text = 'Package Name (PIP)'
+    TabOrder = 9
+  end
+  object edtCondaPackageName: TEdit
+    Touch.InteractiveGestures = [LongTap, DoubleTap]
+    TabOrder = 15
+    Position.X = 152.000000000000000000
+    Position.Y = 176.000000000000000000
+    Size.Width = 329.000000000000000000
+    Size.Height = 22.000000000000000000
+    Size.PlatformDefault = False
+  end
+  object lblCondaPackageName: TLabel
+    Position.X = 16.000000000000000000
+    Position.Y = 176.000000000000000000
+    Size.Width = 129.000000000000000000
+    Size.Height = 17.000000000000000000
+    Size.PlatformDefault = False
+    Text = 'Package Name (Conda)'
+    TabOrder = 8
+  end
+  object lblType: TLabel
+    StyledSettings = [Family, Size, FontColor]
+    Position.X = 144.000000000000000000
+    Position.Y = 18.000000000000000000
+    Size.Width = 17.000000000000000000
+    Size.Height = 17.000000000000000000
+    Size.PlatformDefault = False
+    TextSettings.Font.StyleExt = {00070000000000000004000000}
+    TextSettings.HorzAlign = Center
+    Text = 'T'
+    TabOrder = 36
+  end
+  object lblPyPiURL: TLabel
+    Position.X = 16.000000000000000000
+    Position.Y = 216.000000000000000000
+    Text = 'PyPi URL'
+    TabOrder = 7
+  end
+  object edtPyPiURL: TEdit
+    Touch.InteractiveGestures = [LongTap, DoubleTap]
+    TabOrder = 13
+    Position.X = 152.000000000000000000
+    Position.Y = 216.000000000000000000
+    Size.Width = 329.000000000000000000
+    Size.Height = 22.000000000000000000
+    Size.PlatformDefault = False
+  end
+  object edtDocURL: TEdit
+    Touch.InteractiveGestures = [LongTap, DoubleTap]
+    TabOrder = 12
+    Position.X = 152.000000000000000000
+    Position.Y = 256.000000000000000000
+    Size.Width = 329.000000000000000000
+    Size.Height = 22.000000000000000000
+    Size.PlatformDefault = False
+  end
+  object lblDocURL: TLabel
+    Position.X = 16.000000000000000000
+    Position.Y = 256.000000000000000000
+    Text = 'Documentation URL'
+    TabOrder = 6
+  end
+  object edtGithubURL: TEdit
+    Touch.InteractiveGestures = [LongTap, DoubleTap]
+    TabOrder = 11
+    Position.X = 152.000000000000000000
+    Position.Y = 296.000000000000000000
+    Size.Width = 329.000000000000000000
+    Size.Height = 22.000000000000000000
+    Size.PlatformDefault = False
+  end
+  object lblGithubURL: TLabel
+    Position.X = 16.000000000000000000
+    Position.Y = 296.000000000000000000
+    Text = 'Github URL'
+    TabOrder = 5
+  end
+  object Label3: TLabel
+    Position.X = 496.000000000000000000
+    Position.Y = 184.000000000000000000
+    Size.Width = 137.000000000000000000
+    Size.Height = 17.000000000000000000
+    Size.PlatformDefault = False
+    TextSettings.HorzAlign = Center
+    Text = 'Click To Change Image'
+    TabOrder = 37
+  end
+end
