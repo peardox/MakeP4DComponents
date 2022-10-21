@@ -28,6 +28,16 @@ type
     function ExtractToTemplate(Index: Integer): TTemplateFile; overload;
   end;
 
+  TCellImage = Class(TLayout)
+  private
+    FImage: TImage;
+    FCaption: TLabel;
+  public
+    constructor Create(AOwner: TComponent); override;
+    property Image: TImage Read FImage Write FImage Default Nil;
+    property Caption: TLabel Read FCaption Write FCaption Default Nil;
+  End;
+
   TMainForm = class(TForm)
     OpenProjectDialog: TOpenDialog;
     mmoReadMe: TMemo;
@@ -50,10 +60,10 @@ type
     MainMenu1: TMainMenu;
     MenuItem1: TMenuItem;
     mnuOpenProject: TMenuItem;
-    MenuItem3: TMenuItem;
-    MenuItem4: TMenuItem;
-    MenuItem5: TMenuItem;
-    MenuItem6: TMenuItem;
+    mnuSave: TMenuItem;
+    mnuExit: TMenuItem;
+    mnuResetProject: TMenuItem;
+    mnuExport: TMenuItem;
     SaveProjectDialog: TSaveDialog;
     Panel2: TPanel;
     rectComponent: TRectangle;
@@ -75,18 +85,20 @@ type
     procedure edtProjectHomepageChange(Sender: TObject);
     procedure edtPalettePageChange(Sender: TObject);
     procedure CellEditComponentClick(Sender: TObject);
-    procedure MenuItem5Click(Sender: TObject);
+    procedure mnuResetProjectClick(Sender: TObject);
     procedure mnuOpenProjectClick(Sender: TObject);
+    procedure mnuSaveClick(Sender: TObject);
+    procedure mnuExitClick(Sender: TObject);
+    procedure mnuExportClick(Sender: TObject);
   private
     { Private declarations }
     TemplateList: TList;
     ReplacementList: TList;
     procedure FreeTemplateList;
     procedure FreeReplacementList;
-    procedure HaltAndCatchFire;
     procedure PopulateForm;
     function EditPythonComponent(AComponent: TComponentSettings): Boolean;
-    procedure AddPythonComponent(AComponent: TComponentSettings);
+    function AddPythonComponent(AComponent: TComponentSettings): Boolean;
     procedure FillComponentGrid;
   public
     { Public declarations }
@@ -109,6 +121,28 @@ uses
   Math,
   System.Json.Serializers,
   System.IOUtils;
+
+constructor TCellImage.Create(AOwner: TComponent);
+begin
+  Inherited Create(AOwner);
+
+  Align := TAlignLayout.Client;
+
+  Margins.Top := 8;
+  Margins.Left := 8;
+  Margins.Bottom := 8;
+  Margins.Right := 8;
+
+  FImage := TImage.Create(Self);
+  FImage.Position.Y := 20;
+  FImage.Align := TAlignLayout.Bottom;
+  FImage.Parent := Self;
+
+  FCaption := TLabel.Create(Self);
+  FCaption.TextSettings.HorzAlign := TTextAlign.Center;
+//  FCaption.Align := TAlignLayout.Fit;
+  FCaption.Parent := Self;
+end;
 
 constructor TReplacementToken.Create(AFile: string; AToken: TArray<String>);
 begin
@@ -189,12 +223,20 @@ begin
   end;
 end;
 
-procedure TMainForm.MenuItem5Click(Sender: TObject);
+procedure TMainForm.mnuResetProjectClick(Sender: TObject);
 begin
   if Assigned(ProjectSettings) then
     FreeAndNil(ProjectSettings);
   ProjectSettings := TProjectSettings.Create;
   PopulateForm;
+end;
+
+procedure TMainForm.mnuSaveClick(Sender: TObject);
+begin
+  if SaveProjectDialog.Execute then
+    begin
+      SaveProjectSettings(SaveProjectDialog.Filename);
+    end;
 end;
 
 procedure TMainForm.edtPalettePageChange(Sender: TObject);
@@ -360,25 +402,41 @@ begin
   end;
 end;
 
-procedure TMainForm.HaltAndCatchFire;
-begin
-  ShowMessage('Something went horribly wrong');
-  Application.Terminate;
-end;
-
 procedure TMainForm.btnAddComponentClick(Sender: TObject);
 var
   NewComponent: TComponentSettings;
+  LBitmap: TBitmap;
+  IconImage: TImage;
+  CellImage: TCellImage;
 begin
   NewComponent := TComponentSettings.Create;
-  AddPythonComponent(NewComponent);
+  if (AddPythonComponent(NewComponent)) then
+    begin
+      LBitmap := TBitmap.Create;
+      try
+        // Needs Refactoring
+        CellImage := TCellImage.Create(ComponentGrid);
+        IconImage := CellImage.Image;
+        IconImage.Width := 128;
+        IconImage.Height := 128;
+        DecodeBase64Image(LBitmap, NewComponent.PackageIcon);
+        IconImage.Bitmap.Assign(LBitmap);
+        IconImage.Tag := Length(ProjectSettings.ComponentSettings);
+        IconImage.Onclick := CellEditComponentClick;
+        CellImage.Caption.Text := NewComponent.DelphiPackageName;
+        ComponentGrid.AddObject(CellImage);
+      finally
+        LBitmap.Free;
+      end;
+    end;
 end;
 
-procedure TMainForm.AddPythonComponent(AComponent: TComponentSettings);
+function TMainForm.AddPythonComponent(AComponent: TComponentSettings): Boolean;
 var
   MR: TModalResult;
   Idx: Integer;
 begin
+  Result := False;
   ComponentForm.ModalResult := mrNone;
   ComponentForm.ComponentSettings := AComponent;
   ComponentForm.LoadDefaultIcon;
@@ -389,6 +447,7 @@ begin
       Idx := Length(ProjectSettings.ComponentSettings);
       SetLength(ProjectSettings.ComponentSettings, Idx + 1);
       ProjectSettings.ComponentSettings[Idx] := AComponent;
+      Result := True;
     end
   else
     FreeAndNil(AComponent);
@@ -482,6 +541,16 @@ begin
       end;
 end;
 
+procedure TMainForm.mnuExitClick(Sender: TObject);
+begin
+  Application.Terminate;
+end;
+
+procedure TMainForm.mnuExportClick(Sender: TObject);
+begin
+  // Export
+end;
+
 procedure TMainForm.mnuOpenProjectClick(Sender: TObject);
 begin
   if OpenProjectDialog.Execute then
@@ -495,8 +564,9 @@ end;
 procedure TMainForm.FillComponentGrid;
 var
   I: Integer;
-  CellImage: TImage;
+  IconImage: TImage;
   LBitmap: TBitmap;
+  CellImage: TCellImage;
 begin
   if Length(ProjectSettings.ComponentSettings) > 0 then
     begin
@@ -516,14 +586,19 @@ begin
       try
         for I := 0 to Length(ProjectSettings.ComponentSettings) - 1 do
           begin
-            CellImage := TImage.Create(ComponentGrid);
-            CellImage.Width := 128;
-            CellImage.Height := 128;
+            // Needs Refactoring
+            CellImage := TCellImage.Create(ComponentGrid);
+
+            IconImage := CellImage.Image;
+            IconImage.Width := 128;
+            IconImage.Height := 128;
 
             DecodeBase64Image(LBitmap, ProjectSettings.ComponentSettings[I].PackageIcon);
-            CellImage.Bitmap.Assign(LBitmap);
-            CellImage.Tag := I;
-            CellImage.Onclick := CellEditComponentClick;
+            IconImage.Bitmap.Assign(LBitmap);
+            IconImage.Tag := I;
+            IconImage.Onclick := CellEditComponentClick;
+            CellImage.Caption.Text := ProjectSettings.ComponentSettings[I].DelphiPackageName;
+
             ComponentGrid.AddObject(CellImage);
           end;
       finally

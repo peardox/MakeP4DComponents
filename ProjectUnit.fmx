@@ -4,7 +4,7 @@ object MainForm: TMainForm
   BorderIcons = [biSystemMenu, biMinimize]
   BorderStyle = Single
   Caption = 'P4D Component Creation Tool'
-  ClientHeight = 617
+  ClientHeight = 648
   ClientWidth = 880
   Position = DesktopCenter
   FormFactor.Width = 320
@@ -153,7 +153,7 @@ object MainForm: TMainForm
   object lblComponents: TLabel
     Align = Bottom
     HelpContext = -1
-    Position.Y = 257.000000000000000000
+    Position.Y = 258.000000000000000000
     Size.Width = 880.000000000000000000
     Size.Height = 24.000000000000000000
     Size.PlatformDefault = False
@@ -178,22 +178,25 @@ object MainForm: TMainForm
         Text = 'Open Project'
         OnClick = mnuOpenProjectClick
       end
-      object MenuItem3: TMenuItem
+      object mnuSave: TMenuItem
         Locked = True
         Text = 'Save Project'
+        OnClick = mnuSaveClick
       end
-      object MenuItem5: TMenuItem
+      object mnuResetProject: TMenuItem
         Locked = True
         Text = 'Reset Project'
-        OnClick = MenuItem5Click
+        OnClick = mnuResetProjectClick
       end
-      object MenuItem6: TMenuItem
+      object mnuExport: TMenuItem
         Locked = True
         Text = 'Export Componemts'
+        OnClick = mnuExportClick
       end
-      object MenuItem4: TMenuItem
+      object mnuExit: TMenuItem
         Locked = True
         Text = 'Exit'
+        OnClick = mnuExitClick
       end
     end
   end
@@ -203,39 +206,39 @@ object MainForm: TMainForm
   end
   object Panel2: TPanel
     Align = Bottom
-    Position.Y = 281.000000000000000000
+    Position.Y = 282.000000000000000000
     Size.Width = 880.000000000000000000
-    Size.Height = 336.000000000000000000
+    Size.Height = 366.000000000000000000
     Size.PlatformDefault = False
     TabOrder = 22
     object rectComponent: TRectangle
       Align = Client
       Size.Width = 880.000000000000000000
-      Size.Height = 304.000000000000000000
+      Size.Height = 334.000000000000000000
       Size.PlatformDefault = False
     end
     object VertScrollBox1: TVertScrollBox
       Align = Client
       Size.Width = 880.000000000000000000
-      Size.Height = 304.000000000000000000
+      Size.Height = 334.000000000000000000
       Size.PlatformDefault = False
       TabOrder = 24
       Viewport.Width = 880.000000000000000000
-      Viewport.Height = 304.000000000000000000
+      Viewport.Height = 334.000000000000000000
       object ComponentGrid: TGridLayout
         Align = Client
-        ItemHeight = 144.000000000000000000
-        ItemWidth = 128.000000000000000000
+        ItemHeight = 164.000000000000000000
+        ItemWidth = 144.000000000000000000
         Orientation = Horizontal
         Size.Width = 880.000000000000000000
-        Size.Height = 304.000000000000000000
+        Size.Height = 334.000000000000000000
         Size.PlatformDefault = False
         TabOrder = 7
       end
     end
     object Panel3: TPanel
       Align = Bottom
-      Position.Y = 304.000000000000000000
+      Position.Y = 334.000000000000000000
       Size.Width = 880.000000000000000000
       Size.Height = 32.000000000000000000
       Size.PlatformDefault = False

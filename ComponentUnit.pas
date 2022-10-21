@@ -125,6 +125,8 @@ begin
         edtCondaPackageName.Text := edtDelphiPackageName.Text.ToLower;
       if edtPyPiURL.Text = String.Empty then
         edtPyPiURL.Text := 'https://pypi.org/project/' + edtDelphiPackageName.Text.ToLower + '/';
+      if edtDocURL.Text = String.Empty then
+        edtDocURL.Text := 'https://' + edtDelphiPackageName.Text.ToLower + '.readthedocs.io/';
     end;
 end;
 
