@@ -85,7 +85,7 @@ type
     procedure FreeReplacementList;
     procedure HaltAndCatchFire;
     procedure PopulateForm;
-    procedure EditPythonComponent(AComponent: TComponentSettings);
+    function EditPythonComponent(AComponent: TComponentSettings): Boolean;
     procedure AddPythonComponent(AComponent: TComponentSettings);
     procedure FillComponentGrid;
   public
@@ -398,20 +398,31 @@ procedure TMainForm.CellEditComponentClick(Sender: TObject);
 var
   ExistingComponent: TComponentSettings;
   ClickedIcon: TImage;
+  LBitmap: TBitmap;
 begin
   ClickedIcon := TImage(Sender);
   if Assigned(ClickedIcon) then
     begin
       ExistingComponent := ProjectSettings.ComponentSettings[ClickedIcon.Tag];
-      EditPythonComponent(ExistingComponent);
+      if EditPythonComponent(ExistingComponent) then
+        begin
+          LBitmap := TBitmap.Create;
+          try
+            DecodeBase64Image(LBitmap, ExistingComponent.PackageIcon);
+            ClickedIcon.Bitmap.Assign(LBitmap);
+          finally
+            LBitmap.Free;
+          end;
+        end;
     end;
 end;
 
-procedure TMainForm.EditPythonComponent(AComponent: TComponentSettings);
+function TMainForm.EditPythonComponent(AComponent: TComponentSettings): Boolean;
 var
   CopyComponent: TComponentSettings;
   MR: TModalResult;
 begin
+  Result := False;
   CopyComponent := TComponentSettings.Create;
   try
     ComponentForm.ModalResult := mrNone;
@@ -422,6 +433,10 @@ begin
     MR := ComponentForm.ShowModal;
     if MR = mrOK then
       begin
+        if (AComponent.PackageIcon <> CopyComponent.PackageIcon) then
+          begin
+            Result := True;
+          end;
         AComponent.CopyFrom(CopyComponent);
       end;
   finally

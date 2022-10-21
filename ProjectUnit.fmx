@@ -27,8 +27,8 @@ object MainForm: TMainForm
     Size.Height = 106.000000000000000000
     Size.PlatformDefault = False
     TabOrder = 2
-    Viewport.Width = 880.000000000000000000
-    Viewport.Height = 106.000000000000000000
+    Viewport.Width = 876.000000000000000000
+    Viewport.Height = 102.000000000000000000
   end
   object lblProjectTitle: TLabel
     Position.X = 8.000000000000000000

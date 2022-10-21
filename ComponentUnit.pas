@@ -210,13 +210,21 @@ procedure TComponentForm.imgIconClick(Sender: TObject);
 var
   LBitmap: TBitmap;
 begin
-
   if OpenIconDialog.Execute then
     begin
       LBitmap := TBitmap.Create;
       try
         try
           LBitmap.LoadFromFile(OpenIconDialog.Filename);
+          if (LBitmap.Width > 0) and (LBitmap.Height > 0) then
+            begin
+              if (LBitmap.Width <> 128) or (LBitmap.Height <> 128) then
+                begin
+                  LBitmap.Resize(128, 128);
+                end;
+              imgIcon.Bitmap.Assign(LBitmap);
+              UpdateEncodedIcon;
+            end;
         except
           on E: Exception do
             begin
