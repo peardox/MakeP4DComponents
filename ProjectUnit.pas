@@ -8,7 +8,7 @@ uses
   System.Zip, FMX.Controls.Presentation, FMX.ScrollBox, FMX.Memo, FMX.StdCtrls,
   PyCommon, PyModule, PyPackage, H5Py, FMX.Edit, System.Rtti, FMX.Grid.Style,
   FMX.Grid, FMX.Menus, FMX.Objects,
-  Settings;
+  Settings, FMX.Layouts;
 
 type
   TTemplateFile = Class
@@ -29,9 +29,7 @@ type
   end;
 
   TMainForm = class(TForm)
-    Panel1: TPanel;
-    btnAddComponent: TButton;
-    OpenDialog1: TOpenDialog;
+    OpenProjectDialog: TOpenDialog;
     mmoReadMe: TMemo;
     lblProjectTitle: TLabel;
     edtProjectTitle: TEdit;
@@ -48,35 +46,56 @@ type
     lblPalettePage: TLabel;
     edtPalettePage: TEdit;
     lblComponents: TLabel;
-    Rectangle1: TRectangle;
     Rectangle2: TRectangle;
     MainMenu1: TMainMenu;
     MenuItem1: TMenuItem;
-    MenuItem2: TMenuItem;
+    mnuOpenProject: TMenuItem;
     MenuItem3: TMenuItem;
     MenuItem4: TMenuItem;
+    MenuItem5: TMenuItem;
+    MenuItem6: TMenuItem;
+    SaveProjectDialog: TSaveDialog;
+    Panel2: TPanel;
+    rectComponent: TRectangle;
+    VertScrollBox1: TVertScrollBox;
+    Panel3: TPanel;
+    Button1: TButton;
+    ComponentGrid: TGridLayout;
     procedure btnAddComponentClick(Sender: TObject);
     procedure ExtractTemplateResourceZip;
     procedure ExtractReplacementResourceJson;
     procedure FormCreate(Sender: TObject);
     procedure FormClose(Sender: TObject; var Action: TCloseAction);
     procedure FormDestroy(Sender: TObject);
+    procedure edtProjectTitleChange(Sender: TObject);
+    procedure edtProjectVersionChange(Sender: TObject);
+    procedure mmoReadMeChange(Sender: TObject);
+    procedure edtProjectGroupNameChange(Sender: TObject);
+    procedure edtProjectDescChange(Sender: TObject);
+    procedure edtProjectHomepageChange(Sender: TObject);
+    procedure edtPalettePageChange(Sender: TObject);
+    procedure CellEditComponentClick(Sender: TObject);
+    procedure MenuItem5Click(Sender: TObject);
+    procedure mnuOpenProjectClick(Sender: TObject);
   private
     { Private declarations }
     TemplateList: TList;
     ReplacementList: TList;
-    AppHome: String;
-    Settings: TProjectSettings;
     procedure FreeTemplateList;
     procedure FreeReplacementList;
     procedure Log(const AMsg: String);
     procedure HaltAndCatchFire;
+    procedure PopulateForm;
+    procedure EditPythonComponent(AComponent: TComponentSettings);
+    procedure AddPythonComponent(AComponent: TComponentSettings);
+    procedure FillComponentGrid;
   public
     { Public declarations }
   end;
 
 var
   MainForm: TMainForm;
+  LogStrings: TStringList;
 
 const
   AppName = 'MakeP4DComponenets';
@@ -89,10 +108,7 @@ implementation
 uses
   ComponentUnit,
   Math,
-  System.Json,
   System.Json.Serializers,
-  System.Json.Types,
-  System.Json.Readers,
   System.IOUtils;
 
 constructor TReplacementToken.Create(AFile: string; AToken: TArray<String>);
@@ -177,7 +193,61 @@ end;
 
 procedure TMainForm.Log(const AMsg: String);
 begin
-  mmoReadMe.Lines.Add(AMsg);
+  LogStrings.Add(AMsg);
+end;
+
+procedure TMainForm.MenuItem5Click(Sender: TObject);
+begin
+  if Assigned(ProjectSettings) then
+    FreeAndNil(ProjectSettings);
+  ProjectSettings := TProjectSettings.Create;
+  PopulateForm;
+end;
+
+procedure TMainForm.edtPalettePageChange(Sender: TObject);
+begin
+  ProjectSettings.PalettePage := edtPalettePage.Text;
+end;
+
+procedure TMainForm.edtProjectDescChange(Sender: TObject);
+begin
+  ProjectSettings.ProjectDesc := edtProjectDesc.Text;
+end;
+
+procedure TMainForm.edtProjectGroupNameChange(Sender: TObject);
+begin
+  ProjectSettings.ProjectGroupName := edtProjectGroupName.Text;
+end;
+
+procedure TMainForm.edtProjectHomepageChange(Sender: TObject);
+begin
+  ProjectSettings.ProjectHomepage := edtProjectHomepage.Text;
+end;
+
+procedure TMainForm.edtProjectTitleChange(Sender: TObject);
+begin
+  ProjectSettings.ProjectTitle := edtProjectTitle.Text;
+end;
+
+procedure TMainForm.edtProjectVersionChange(Sender: TObject);
+begin
+  ProjectSettings.ProjectVersion := edtProjectVersion.Text;
+end;
+
+procedure TMainForm.mmoReadMeChange(Sender: TObject);
+begin
+  ProjectSettings.ReadMe := mmoReadMe.Text;
+end;
+
+procedure TMainForm.PopulateForm;
+begin
+  edtProjectTitle.Text := ProjectSettings.ProjectTitle;
+  edtProjectVersion.Text := ProjectSettings.ProjectVersion;
+  mmoReadMe.Text := ProjectSettings.ReadMe;
+  edtProjectGroupName.Text := ProjectSettings.ProjectGroupName;
+  edtProjectDesc.Text := ProjectSettings.ProjectDesc;
+  edtProjectHomepage.Text := ProjectSettings.ProjectHomepage;
+  edtPalettePage.Text := ProjectSettings.PalettePage;
 end;
 
 procedure TMainForm.ExtractReplacementResourceJson;
@@ -305,43 +375,71 @@ end;
 
 procedure TMainForm.btnAddComponentClick(Sender: TObject);
 var
-  mr: TModalResult;
+  NewComponent: TComponentSettings;
+begin
+  NewComponent := TComponentSettings.Create;
+  AddPythonComponent(NewComponent);
+end;
+
+procedure TMainForm.AddPythonComponent(AComponent: TComponentSettings);
+var
+  MR: TModalResult;
+  Idx: Integer;
 begin
   ComponentForm.ModalResult := mrNone;
-  ComponentForm.LoadDefaults;
-  mr := ComponentForm.ShowModal;
-  if mr = mrOK then
+  ComponentForm.ComponentSettings := AComponent;
+  ComponentForm.LoadDefaultIcon;
+  ComponentForm.PopulateForm;
+  MR := ComponentForm.ShowModal;
+  if MR = mrOK then
     begin
+      Idx := Length(ProjectSettings.ComponentSettings);
+      SetLength(ProjectSettings.ComponentSettings, Idx + 1);
+      ProjectSettings.ComponentSettings[Idx] := AComponent;
+    end
+  else
+    FreeAndNil(AComponent);
+end;
 
+procedure TMainForm.CellEditComponentClick(Sender: TObject);
+var
+  ExistingComponent: TComponentSettings;
+  ClickedIcon: TImage;
+begin
+  ClickedIcon := TImage(Sender);
+  if Assigned(ClickedIcon) then
+    begin
+      ExistingComponent := ProjectSettings.ComponentSettings[ClickedIcon.Tag];
+      EditPythonComponent(ExistingComponent);
     end;
+end;
+
+procedure TMainForm.EditPythonComponent(AComponent: TComponentSettings);
+var
+  CopyComponent: TComponentSettings;
+  MR: TModalResult;
+begin
+  CopyComponent := TComponentSettings.Create;
+  try
+    ComponentForm.ModalResult := mrNone;
+    CopyComponent.CopyFrom(AComponent);
+    ComponentForm.ComponentSettings := CopyComponent;
+    ComponentForm.LoadDefaultIcon;
+    ComponentForm.PopulateForm;
+    MR := ComponentForm.ShowModal;
+    if MR = mrOK then
+      begin
+        AComponent.CopyFrom(CopyComponent);
+      end;
+  finally
+    CopyComponent.Free;
+  end;
 end;
 
 procedure TMainForm.FormClose(Sender: TObject; var Action: TCloseAction);
 begin
   if ModalResult <> mrClose then
     ModalResult := mrCancel;
-end;
-
-procedure TMainForm.FormCreate(Sender: TObject);
-begin
-  AppHome := IncludeTrailingPathDelimiter(System.IOUtils.TPath.GetHomePath) + AppName;
-  if not DirectoryExists(AppHome) then
-    begin
-      ForceDirectories(AppHome);
-    end;
-
-  ExtractTemplateResourceZip;
-  ExtractReplacementResourceJson;
-
-  OpenDialog1.Filter:='Component Project Files (*.cpf)|*.cpf';
-  OpenDialog1.InitialDir := AppHome;
-end;
-
-// Tidy up after ourselves
-procedure TMainForm.FormDestroy(Sender: TObject);
-begin
-  FreeTemplateList;
-  FreeReplacementList;
 end;
 
 procedure TMainForm.FreeTemplateList;
@@ -374,6 +472,102 @@ begin
           end;
         FreeAndNil(ReplacementList);
       end;
+end;
+
+procedure TMainForm.mnuOpenProjectClick(Sender: TObject);
+begin
+  if OpenProjectDialog.Execute then
+    begin
+      LoadProjectSettings(OpenProjectDialog.Filename);
+      PopulateForm;
+      FillComponentGrid;
+    end;
+end;
+
+procedure TMainForm.FillComponentGrid;
+var
+  I: Integer;
+  CellImage: TImage;
+  LBitmap: TBitmap;
+begin
+  if Length(ProjectSettings.ComponentSettings) > 0 then
+    begin
+    {
+      if ComponentGrid.Children.Count > 0 then
+        begin
+          for I := 0 to ComponentGrid.Children.Count - 1 do
+            begin
+              ComponentGrid.Children[I].Free;
+            end;
+        end;
+    }
+      LBitmap := TBitmap.Create;
+      try
+        for I := 0 to Length(ProjectSettings.ComponentSettings) - 1 do
+          begin
+            CellImage := TImage.Create(ComponentGrid);
+            CellImage.Width := 128;
+            CellImage.Height := 128;
+
+            DecodeBase64Image(LBitmap, ProjectSettings.ComponentSettings[I].PackageIcon);
+            CellImage.Bitmap.Assign(LBitmap);
+            CellImage.Tag := I;
+            CellImage.Onclick := CellEditComponentClick;
+            ComponentGrid.AddObject(CellImage);
+          end;
+      finally
+        LBitmap.Free;
+      end;
+    end;
+end;
+
+// Tidy up after ourselves
+procedure TMainForm.FormDestroy(Sender: TObject);
+begin
+  FreeTemplateList;
+  FreeReplacementList;
+  if Assigned(ProjectSettings) then
+    begin
+      SaveProjectSettings(IncludeTrailingPathDelimiter(AppHome) + DefaultProjectFile);
+      FreeAndNil(ProjectSettings);
+    end;
+  LogStrings.SaveToFile(IncludeTrailingPathDelimiter(AppHome) + 'Debug.log');
+  LogStrings.Free;
+end;
+
+procedure TMainForm.FormCreate(Sender: TObject);
+begin
+  LogStrings := TStringList.Create;;
+
+  AppHome := IncludeTrailingPathDelimiter(System.IOUtils.TPath.GetHomePath) + AppName;
+  if not DirectoryExists(AppHome) then
+    begin
+      ForceDirectories(AppHome);
+    end;
+
+  OpenProjectDialog.Filter:='P4D Project Files (*.p4d)|*.p4d';
+  OpenProjectDialog.DefaultExt := '.p4d';
+  OpenProjectDialog.InitialDir := AppHome;
+
+  SaveProjectDialog.Filter:='P4D Project Files (*.p4d)|*.p4d';
+  SaveProjectDialog.DefaultExt := '.p4d';
+  SaveProjectDialog.InitialDir := AppHome;
+
+  edtProjectTitle.TextPrompt := 'This text will appear as the title of the README.md';
+  edtProjectVersion.TextPrompt := 'e.g. 1.0.0';
+//  mmoReadMe.TextPrompt := '';
+  edtProjectGroupName.TextPrompt := 'Your project''s main installation file';
+  edtProjectDesc.TextPrompt := 'Short project description';
+  edtProjectHomepage.TextPrompt := 'If you have one for it';
+  edtPalettePage.TextPrompt := 'Python - My Components';
+
+  LoadProjectSettings(IncludeTrailingPathDelimiter(AppHome) + DefaultProjectFile);
+
+  ExtractTemplateResourceZip;
+  ExtractReplacementResourceJson;
+
+  PopulateForm;
+  FillComponentGrid;
 end;
 
 end.

@@ -13,32 +13,14 @@ object MainForm: TMainForm
   OnCreate = FormCreate
   OnDestroy = FormDestroy
   DesignerMasterStyle = 0
-  object OpenDialog1: TOpenDialog
+  object OpenProjectDialog: TOpenDialog
     Left = 216
     Top = 96
-  end
-  object Panel1: TPanel
-    Align = Bottom
-    Position.Y = 585.000000000000000000
-    Size.Width = 880.000000000000000000
-    Size.Height = 32.000000000000000000
-    Size.PlatformDefault = False
-    TabOrder = 7
-    object btnAddComponent: TButton
-      Anchors = [akTop, akRight]
-      Position.X = 762.000000000000000000
-      Position.Y = 6.000000000000000000
-      Size.Width = 111.000000000000000000
-      Size.Height = 22.000000000000000000
-      Size.PlatformDefault = False
-      TabOrder = 6
-      Text = 'Add Package'
-      OnClick = btnAddComponentClick
-    end
   end
   object mmoReadMe: TMemo
     Touch.InteractiveGestures = [Pan, LongTap, DoubleTap]
     DataDetectorTypes = []
+    OnChange = mmoReadMeChange
     Align = Horizontal
     Position.Y = 52.000000000000000000
     Size.Width = 880.000000000000000000
@@ -55,7 +37,7 @@ object MainForm: TMainForm
     Size.Height = 17.000000000000000000
     Size.PlatformDefault = False
     Text = 'Project Title (header in README.md)'
-    TabOrder = 11
+    TabOrder = 9
   end
   object edtProjectTitle: TEdit
     Touch.InteractiveGestures = [LongTap, DoubleTap]
@@ -65,18 +47,19 @@ object MainForm: TMainForm
     Size.Width = 433.000000000000000000
     Size.Height = 22.000000000000000000
     Size.PlatformDefault = False
+    OnChange = edtProjectTitleChange
   end
   object lblReadMe: TLabel
     Position.X = 8.000000000000000000
     Position.Y = 32.000000000000000000
     Text = 'README.md Text'
-    TabOrder = 12
+    TabOrder = 10
   end
   object lblProjectGroupName: TLabel
     Position.X = 8.000000000000000000
     Position.Y = 168.000000000000000000
     Text = 'Project Group Name'
-    TabOrder = 19
+    TabOrder = 17
   end
   object edtProjectGroupName: TEdit
     Touch.InteractiveGestures = [LongTap, DoubleTap]
@@ -86,18 +69,19 @@ object MainForm: TMainForm
     Size.Width = 257.000000000000000000
     Size.Height = 22.000000000000000000
     Size.PlatformDefault = False
+    OnChange = edtProjectGroupNameChange
   end
   object lblProjectGroupNameExt: TLabel
     Position.X = 408.000000000000000000
     Position.Y = 172.000000000000000000
     Text = '.groupproj'
-    TabOrder = 20
+    TabOrder = 18
   end
   object lblProjectHomepage: TLabel
     Position.X = 8.000000000000000000
     Position.Y = 208.000000000000000000
     Text = 'Project Homepage'
-    TabOrder = 18
+    TabOrder = 16
   end
   object edtProjectHomepage: TEdit
     Touch.InteractiveGestures = [LongTap, DoubleTap]
@@ -107,13 +91,14 @@ object MainForm: TMainForm
     Size.Width = 257.000000000000000000
     Size.Height = 22.000000000000000000
     Size.PlatformDefault = False
+    OnChange = edtProjectHomepageChange
   end
   object lblProjectDesc: TLabel
     Anchors = [akTop, akRight]
     Position.X = 483.000000000000000000
     Position.Y = 168.000000000000000000
     Text = 'Project Description'
-    TabOrder = 17
+    TabOrder = 15
   end
   object edtProjectDesc: TEdit
     Touch.InteractiveGestures = [LongTap, DoubleTap]
@@ -124,6 +109,7 @@ object MainForm: TMainForm
     Size.Width = 257.000000000000000000
     Size.Height = 22.000000000000000000
     Size.PlatformDefault = False
+    OnChange = edtProjectDescChange
   end
   object lblProjectVersion: TLabel
     Anchors = [akTop, akRight]
@@ -133,7 +119,7 @@ object MainForm: TMainForm
     Size.Height = 17.000000000000000000
     Size.PlatformDefault = False
     Text = 'Project Version'
-    TabOrder = 16
+    TabOrder = 14
   end
   object edtProjectVersion: TEdit
     Touch.InteractiveGestures = [LongTap, DoubleTap]
@@ -144,13 +130,14 @@ object MainForm: TMainForm
     Size.Width = 57.000000000000000000
     Size.Height = 22.000000000000000000
     Size.PlatformDefault = False
+    OnChange = edtProjectVersionChange
   end
   object lblPalettePage: TLabel
     Anchors = [akTop, akRight]
     Position.X = 483.000000000000000000
     Position.Y = 208.000000000000000000
     Text = 'Delphi Palette Page'
-    TabOrder = 15
+    TabOrder = 13
   end
   object edtPalettePage: TEdit
     Touch.InteractiveGestures = [LongTap, DoubleTap]
@@ -161,6 +148,7 @@ object MainForm: TMainForm
     Size.Width = 257.000000000000000000
     Size.Height = 22.000000000000000000
     Size.PlatformDefault = False
+    OnChange = edtPalettePageChange
   end
   object lblComponents: TLabel
     Align = Bottom
@@ -171,14 +159,7 @@ object MainForm: TMainForm
     Size.PlatformDefault = False
     TextSettings.HorzAlign = Center
     Text = 'Components'
-    TabOrder = 14
-  end
-  object Rectangle1: TRectangle
-    Align = Bottom
-    Position.Y = 281.000000000000000000
-    Size.Width = 880.000000000000000000
-    Size.Height = 304.000000000000000000
-    Size.PlatformDefault = False
+    TabOrder = 12
   end
   object Rectangle2: TRectangle
     Align = Horizontal
@@ -188,21 +169,87 @@ object MainForm: TMainForm
     Size.PlatformDefault = False
   end
   object MainMenu1: TMainMenu
-    Left = 288
+    Left = 56
     Top = 96
     object MenuItem1: TMenuItem
       Text = 'File'
-      object MenuItem2: TMenuItem
+      object mnuOpenProject: TMenuItem
         Locked = True
-        Text = 'Open'
+        Text = 'Open Project'
+        OnClick = mnuOpenProjectClick
       end
       object MenuItem3: TMenuItem
         Locked = True
-        Text = 'Save'
+        Text = 'Save Project'
+      end
+      object MenuItem5: TMenuItem
+        Locked = True
+        Text = 'Reset Project'
+        OnClick = MenuItem5Click
+      end
+      object MenuItem6: TMenuItem
+        Locked = True
+        Text = 'Export Componemts'
       end
       object MenuItem4: TMenuItem
         Locked = True
         Text = 'Exit'
+      end
+    end
+  end
+  object SaveProjectDialog: TSaveDialog
+    Left = 376
+    Top = 96
+  end
+  object Panel2: TPanel
+    Align = Bottom
+    Position.Y = 281.000000000000000000
+    Size.Width = 880.000000000000000000
+    Size.Height = 336.000000000000000000
+    Size.PlatformDefault = False
+    TabOrder = 22
+    object rectComponent: TRectangle
+      Align = Client
+      Size.Width = 880.000000000000000000
+      Size.Height = 304.000000000000000000
+      Size.PlatformDefault = False
+    end
+    object VertScrollBox1: TVertScrollBox
+      Align = Client
+      Size.Width = 880.000000000000000000
+      Size.Height = 304.000000000000000000
+      Size.PlatformDefault = False
+      TabOrder = 24
+      Viewport.Width = 880.000000000000000000
+      Viewport.Height = 304.000000000000000000
+      object ComponentGrid: TGridLayout
+        Align = Client
+        ItemHeight = 144.000000000000000000
+        ItemWidth = 128.000000000000000000
+        Orientation = Horizontal
+        Size.Width = 880.000000000000000000
+        Size.Height = 304.000000000000000000
+        Size.PlatformDefault = False
+        TabOrder = 7
+      end
+    end
+    object Panel3: TPanel
+      Align = Bottom
+      Position.Y = 304.000000000000000000
+      Size.Width = 880.000000000000000000
+      Size.Height = 32.000000000000000000
+      Size.PlatformDefault = False
+      TabOrder = 7
+      object Button1: TButton
+        Anchors = [akTop, akRight]
+        Position.X = 762.000000000000000000
+        Position.Y = 6.000000000000000000
+        Size.Width = 111.000000000000000000
+        Size.Height = 22.000000000000000000
+        Size.PlatformDefault = False
+        TabOrder = 6
+        Text = 'Add Package'
+        OnClick = btnAddComponentClick
       end
     end
   end
