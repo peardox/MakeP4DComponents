@@ -83,7 +83,6 @@ type
     ReplacementList: TList;
     procedure FreeTemplateList;
     procedure FreeReplacementList;
-    procedure Log(const AMsg: String);
     procedure HaltAndCatchFire;
     procedure PopulateForm;
     procedure EditPythonComponent(AComponent: TComponentSettings);
@@ -95,10 +94,10 @@ type
 
 var
   MainForm: TMainForm;
-  LogStrings: TStringList;
 
 const
   AppName = 'MakeP4DComponenets';
+
 
 implementation
 
@@ -177,9 +176,9 @@ begin
         except
           on E: Exception do
             begin
-              MainForm.Log('Unhandled Exception in ExtractTemplateResourceZip');
-              MainForm.Log('Class : ' + E.ClassName);
-              MainForm.Log('Error : ' + E.Message);
+              Log('Unhandled Exception in ExtractToTemplate');
+              Log('Class : ' + E.ClassName);
+              Log('Error : ' + E.Message);
             end;
         end;
       end;
@@ -188,12 +187,6 @@ begin
     LInStream.Free;
     Result := Template;
   end;
-end;
-
-
-procedure TMainForm.Log(const AMsg: String);
-begin
-  LogStrings.Add(AMsg);
 end;
 
 procedure TMainForm.MenuItem5Click(Sender: TObject);
@@ -492,15 +485,18 @@ var
 begin
   if Length(ProjectSettings.ComponentSettings) > 0 then
     begin
-    {
-      if ComponentGrid.Children.Count > 0 then
+
+      if Assigned(ComponentGrid.Children) then
         begin
-          for I := 0 to ComponentGrid.Children.Count - 1 do
+          if ComponentGrid.Children.Count > 0 then
             begin
-              ComponentGrid.Children[I].Free;
+              for I := ComponentGrid.Children.Count - 1 downto 0 do
+                begin
+                  ComponentGrid.Children[I].Free;
+                end;
             end;
         end;
-    }
+
       LBitmap := TBitmap.Create;
       try
         for I := 0 to Length(ProjectSettings.ComponentSettings) - 1 do

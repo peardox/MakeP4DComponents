@@ -207,10 +207,28 @@ begin
 end;
 
 procedure TComponentForm.imgIconClick(Sender: TObject);
+var
+  LBitmap: TBitmap;
 begin
+
   if OpenIconDialog.Execute then
     begin
+      LBitmap := TBitmap.Create;
+      try
+        try
+          LBitmap.LoadFromFile(OpenIconDialog.Filename);
+        except
+          on E: Exception do
+            begin
+              Log('Unhandled Exception in ExtractTemplateResourceZip');
+              Log('Class : ' + E.ClassName);
+              Log('Error : ' + E.Message);
+            end;
+        end;
 
+      finally
+        LBitmap.Free;
+      end;
     end;
 end;
 

@@ -40,6 +40,7 @@ type
 var
   AppHome: String;
   ProjectSettings: TProjectSettings;
+  LogStrings: TStringList;
 
 const
   DefaultProjectFile = 'WorkingProject.p4d';
@@ -47,6 +48,7 @@ const
 procedure SaveProjectSettings(const AProjectFile: String);
 procedure LoadProjectSettings(const AProjectFile: String);
 procedure DecodeBase64Image(var ABitmap: TBitmap; Base64Image: String);
+procedure Log(const AMsg: String);
 
 implementation
 
@@ -55,6 +57,11 @@ uses
   System.NetEncoding,
   System.SysUtils,
   System.Json.Serializers;
+
+procedure Log(const AMsg: String);
+begin
+  LogStrings.Add(AMsg);
+end;
 
 constructor TComponentSettings.Create;
 begin
