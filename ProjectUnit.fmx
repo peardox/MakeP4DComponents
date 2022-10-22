@@ -4,7 +4,7 @@ object MainForm: TMainForm
   BorderIcons = [biSystemMenu, biMinimize]
   BorderStyle = Single
   Caption = 'P4D Component Creation Tool'
-  ClientHeight = 648
+  ClientHeight = 682
   ClientWidth = 880
   Position = DesktopCenter
   FormFactor.Width = 320
@@ -37,7 +37,7 @@ object MainForm: TMainForm
     Size.Height = 17.000000000000000000
     Size.PlatformDefault = False
     Text = 'Project Title (header in README.md)'
-    TabOrder = 9
+    TabOrder = 10
   end
   object edtProjectTitle: TEdit
     Touch.InteractiveGestures = [LongTap, DoubleTap]
@@ -53,19 +53,19 @@ object MainForm: TMainForm
     Position.X = 8.000000000000000000
     Position.Y = 32.000000000000000000
     Text = 'README.md Text'
-    TabOrder = 10
+    TabOrder = 11
   end
   object lblProjectGroupName: TLabel
     Position.X = 8.000000000000000000
-    Position.Y = 168.000000000000000000
+    Position.Y = 192.000000000000000000
     Text = 'Project Group Name'
-    TabOrder = 17
+    TabOrder = 18
   end
   object edtProjectGroupName: TEdit
     Touch.InteractiveGestures = [LongTap, DoubleTap]
-    TabOrder = 3
+    TabOrder = 4
     Position.X = 144.000000000000000000
-    Position.Y = 168.000000000000000000
+    Position.Y = 192.000000000000000000
     Size.Width = 257.000000000000000000
     Size.Height = 22.000000000000000000
     Size.PlatformDefault = False
@@ -73,21 +73,21 @@ object MainForm: TMainForm
   end
   object lblProjectGroupNameExt: TLabel
     Position.X = 408.000000000000000000
-    Position.Y = 172.000000000000000000
+    Position.Y = 196.000000000000000000
     Text = '.groupproj'
-    TabOrder = 18
+    TabOrder = 19
   end
   object lblProjectHomepage: TLabel
     Position.X = 8.000000000000000000
-    Position.Y = 208.000000000000000000
+    Position.Y = 232.000000000000000000
     Text = 'Project Homepage'
-    TabOrder = 16
+    TabOrder = 17
   end
   object edtProjectHomepage: TEdit
     Touch.InteractiveGestures = [LongTap, DoubleTap]
-    TabOrder = 5
+    TabOrder = 6
     Position.X = 144.000000000000000000
-    Position.Y = 208.000000000000000000
+    Position.Y = 232.000000000000000000
     Size.Width = 257.000000000000000000
     Size.Height = 22.000000000000000000
     Size.PlatformDefault = False
@@ -96,16 +96,16 @@ object MainForm: TMainForm
   object lblProjectDesc: TLabel
     Anchors = [akTop, akRight]
     Position.X = 483.000000000000000000
-    Position.Y = 168.000000000000000000
+    Position.Y = 192.000000000000000000
     Text = 'Project Description'
-    TabOrder = 15
+    TabOrder = 16
   end
   object edtProjectDesc: TEdit
     Touch.InteractiveGestures = [LongTap, DoubleTap]
     Anchors = [akTop, akRight]
-    TabOrder = 4
+    TabOrder = 5
     Position.X = 619.000000000000000000
-    Position.Y = 168.000000000000000000
+    Position.Y = 192.000000000000000000
     Size.Width = 257.000000000000000000
     Size.Height = 22.000000000000000000
     Size.PlatformDefault = False
@@ -119,7 +119,7 @@ object MainForm: TMainForm
     Size.Height = 17.000000000000000000
     Size.PlatformDefault = False
     Text = 'Project Version'
-    TabOrder = 14
+    TabOrder = 15
   end
   object edtProjectVersion: TEdit
     Touch.InteractiveGestures = [LongTap, DoubleTap]
@@ -135,16 +135,16 @@ object MainForm: TMainForm
   object lblPalettePage: TLabel
     Anchors = [akTop, akRight]
     Position.X = 483.000000000000000000
-    Position.Y = 208.000000000000000000
+    Position.Y = 232.000000000000000000
     Text = 'Delphi Palette Page'
-    TabOrder = 13
+    TabOrder = 14
   end
   object edtPalettePage: TEdit
     Touch.InteractiveGestures = [LongTap, DoubleTap]
     Anchors = [akTop, akRight]
-    TabOrder = 6
+    TabOrder = 7
     Position.X = 619.000000000000000000
-    Position.Y = 208.000000000000000000
+    Position.Y = 232.000000000000000000
     Size.Width = 257.000000000000000000
     Size.Height = 22.000000000000000000
     Size.PlatformDefault = False
@@ -153,19 +153,19 @@ object MainForm: TMainForm
   object lblComponents: TLabel
     Align = Bottom
     HelpContext = -1
-    Position.Y = 258.000000000000000000
+    Position.Y = 292.000000000000000000
     Size.Width = 880.000000000000000000
     Size.Height = 24.000000000000000000
     Size.PlatformDefault = False
     TextSettings.HorzAlign = Center
     Text = 'Components'
-    TabOrder = 12
+    TabOrder = 13
   end
   object Rectangle2: TRectangle
     Align = Horizontal
-    Position.Y = 236.000000000000000000
+    Position.Y = 272.000000000000000000
     Size.Width = 880.000000000000000000
-    Size.Height = 4.000000000000000000
+    Size.Height = 1.000000000000000000
     Size.PlatformDefault = False
   end
   object MainMenu1: TMainMenu
@@ -206,11 +206,11 @@ object MainForm: TMainForm
   end
   object Panel2: TPanel
     Align = Bottom
-    Position.Y = 282.000000000000000000
+    Position.Y = 316.000000000000000000
     Size.Width = 880.000000000000000000
     Size.Height = 366.000000000000000000
     Size.PlatformDefault = False
-    TabOrder = 22
+    TabOrder = 23
     object rectComponent: TRectangle
       Align = Client
       Size.Width = 880.000000000000000000
@@ -250,10 +250,20 @@ object MainForm: TMainForm
         Size.Width = 111.000000000000000000
         Size.Height = 22.000000000000000000
         Size.PlatformDefault = False
-        TabOrder = 6
+        TabOrder = 7
         Text = 'Add Package'
         OnClick = btnAddComponentClick
       end
     end
+  end
+  object cbIncludePackageInfo: TCheckBox
+    Position.X = 8.000000000000000000
+    Position.Y = 160.000000000000000000
+    Size.Width = 329.000000000000000000
+    Size.Height = 19.000000000000000000
+    Size.PlatformDefault = False
+    TabOrder = 3
+    Text = 'Append Package Optional Information to README.md'
+    OnChange = cbIncludePackageInfoChange
   end
 end

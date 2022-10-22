@@ -20,7 +20,7 @@ type
     GithubURL: String;
     PackageIcon: String;
     constructor Create;
-    function CopyFrom(AObject: TComponentSettings): TComponentSettings;
+    procedure CopyFrom(AObject: TComponentSettings);
   end;
   TProjectComponentSettings = TArray<TComponentSettings>;
 
@@ -32,6 +32,7 @@ type
     ProjectDesc: String;
     ProjectHomepage: String;
     PalettePage: String;
+    IncludePackageInfo: Boolean;
     ComponentSettings: TProjectComponentSettings;
     constructor Create;
     destructor Destroy; override;
@@ -68,7 +69,7 @@ begin
   Inherited Create;
 end;
 
-function TComponentSettings.CopyFrom(AObject: TComponentSettings): TComponentSettings;
+procedure TComponentSettings.CopyFrom(AObject: TComponentSettings);
   function FullCopy(const AStr: String): String;
   begin
     Result := Copy(AStr, 1, Length(AStr));

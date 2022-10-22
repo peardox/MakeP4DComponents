@@ -71,6 +71,7 @@ type
     Panel3: TPanel;
     Button1: TButton;
     ComponentGrid: TGridLayout;
+    cbIncludePackageInfo: TCheckBox;
     procedure btnAddComponentClick(Sender: TObject);
     procedure ExtractTemplateResourceZip;
     procedure ExtractReplacementResourceJson;
@@ -90,6 +91,7 @@ type
     procedure mnuSaveClick(Sender: TObject);
     procedure mnuExitClick(Sender: TObject);
     procedure mnuExportClick(Sender: TObject);
+    procedure cbIncludePackageInfoChange(Sender: TObject);
   private
     { Private declarations }
     TemplateList: TList;
@@ -274,11 +276,17 @@ begin
   ProjectSettings.ReadMe := mmoReadMe.Text;
 end;
 
+procedure TMainForm.cbIncludePackageInfoChange(Sender: TObject);
+begin
+  ProjectSettings.IncludePackageInfo := cbIncludePackageInfo.IsChecked;
+end;
+
 procedure TMainForm.PopulateForm;
 begin
   edtProjectTitle.Text := ProjectSettings.ProjectTitle;
   edtProjectVersion.Text := ProjectSettings.ProjectVersion;
   mmoReadMe.Text := ProjectSettings.ReadMe;
+  cbIncludePackageInfo.IsChecked := ProjectSettings.IncludePackageInfo;
   edtProjectGroupName.Text := ProjectSettings.ProjectGroupName;
   edtProjectDesc.Text := ProjectSettings.ProjectDesc;
   edtProjectHomepage.Text := ProjectSettings.ProjectHomepage;
@@ -422,7 +430,7 @@ begin
         DecodeBase64Image(LBitmap, NewComponent.PackageIcon);
         IconImage.Bitmap.Assign(LBitmap);
         IconImage.Tag := Length(ProjectSettings.ComponentSettings);
-        IconImage.Onclick := CellEditComponentClick;
+        IconImage.OnClick := CellEditComponentClick;
         CellImage.Caption.Text := NewComponent.DelphiPackageName;
         ComponentGrid.AddObject(CellImage);
       finally
@@ -596,7 +604,7 @@ begin
             DecodeBase64Image(LBitmap, ProjectSettings.ComponentSettings[I].PackageIcon);
             IconImage.Bitmap.Assign(LBitmap);
             IconImage.Tag := I;
-            IconImage.Onclick := CellEditComponentClick;
+            IconImage.OnClick := CellEditComponentClick;
             CellImage.Caption.Text := ProjectSettings.ComponentSettings[I].DelphiPackageName;
 
             ComponentGrid.AddObject(CellImage);

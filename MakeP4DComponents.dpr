@@ -5,7 +5,8 @@ uses
   FMX.Forms,
   ProjectUnit in 'ProjectUnit.pas' {MainForm},
   ComponentUnit in 'ComponentUnit.pas' {ComponentForm},
-  Settings in 'Settings.pas';
+  Settings in 'Settings.pas',
+  OSBrowser in 'OSBrowser.pas';
 
 {$R *.res}
 
