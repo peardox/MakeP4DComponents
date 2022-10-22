@@ -4,10 +4,29 @@ interface
 
 uses
   System.Classes,
+  System.Zip,
   FMX.Dialogs,
   FMX.Graphics;
 
 type
+  TTemplateFile = Class
+    TplFileName: String;
+    TplTemplate: String;
+    constructor Create(AFileName: string; ATemplate: String);
+  End;
+
+  TReplacementToken = Class
+    tfile: String;
+    xlat: TArray<String>;
+    oneOff: Boolean;
+    constructor Create(AFile: string; AToken: TArray<String>; AOneOff: Boolean);
+  end;
+  TReplacementTokens = TArray<TReplacementToken>;
+
+  TZipFileHelper = class helper for TZipFile
+    function ExtractToTemplate(Index: Integer): TTemplateFile; overload;
+  end;
+
   TComponentSettings = Class(TObject)
     DelphiPackageName: String;
     PublicPackageName: String;
@@ -51,6 +70,8 @@ procedure SaveProjectSettings(const AProjectFile: String);
 procedure LoadProjectSettings(const AProjectFile: String);
 procedure DecodeBase64Image(var ABitmap: TBitmap; Base64Image: String);
 procedure Log(const AMsg: String);
+function TokenSortFunc(Item1, Item2: Pointer): Integer;
+function TemplateSortFunc(Item1, Item2: Pointer): Integer;
 
 implementation
 
@@ -63,6 +84,16 @@ uses
 procedure Log(const AMsg: String);
 begin
   LogStrings.Add(AMsg);
+end;
+
+function TokenSortFunc(Item1, Item2: Pointer): Integer;
+begin
+  Result := CompareText(TReplacementToken(Item1).tfile, TReplacementToken(Item2).tfile);
+end;
+
+function TemplateSortFunc(Item1, Item2: Pointer): Integer;
+begin
+  Result := CompareText(TTemplateFile(Item1).TplFileName, TTemplateFile(Item2).TplFileName);
 end;
 
 constructor TComponentSettings.Create;
@@ -198,5 +229,77 @@ begin
     MStream.Free;
   end;
 end;
+
+constructor TReplacementToken.Create(AFile: string; AToken: TArray<String>; AOneOff: Boolean);
+begin
+  Inherited Create;
+  tfile := AFile;
+  xlat := AToken;
+  oneOff := AOneOff;
+end;
+
+constructor TTemplateFile.Create(AFileName: string; ATemplate: String);
+begin
+  Inherited Create;
+  TplFileName := AFileName;
+  TplTemplate := ATemplate;
+end;
+
+Function TZipFileHelper.ExtractToTemplate(Index: Integer): TTemplateFile;
+var
+  LInStream: TStream;
+  LHeader: TZipHeader;
+  LFileName: string;
+  Template: TTemplateFile;
+  TemplateText: String;
+  SS: TStringStream;
+begin
+  SS := TStringStream.Create;
+  Template := Nil;
+  // Get decompression stream for file
+  Read(Index, LInStream, LHeader);
+  try
+    if not GetUTF8PathFromExtraField(LHeader, LFileName) then
+      LFileName := InternalGetFileName(Index);
+{$IFDEF MSWINDOWS} // ZIP stores files with '/', so translate to a relative Windows path.
+    LFileName := StringReplace(LFileName, '/', '\', [rfReplaceAll]);
+{$ENDIF}
+    // Open the File For output
+    if not (LFileName.Chars[LFileName.Length-1] = PathDelim) then
+      Begin
+        try // And Copy from the decompression stream.
+          // See Bit 3 at http://www.pkware.com/documents/casestudies/APPNOTE.TXT
+          if (LHeader.Flag and (1 shl 3)) = 0 then
+          begin
+            // Empty files should not be read
+            if LHeader.UncompressedSize > 0 then
+              begin
+                SS.CopyFrom(LInStream , 0);
+                TemplateText := SS.DataString;
+                Template := TTemplateFile.Create(LFileName, TemplateText);
+              end;
+          end
+          else
+          begin
+            SS.CopyFrom(LInStream , 0);
+            TemplateText := SS.DataString;
+            Template := TTemplateFile.Create(LFileName, TemplateText);
+          end;
+        except
+          on E: Exception do
+            begin
+              Log('Unhandled Exception in ExtractToTemplate');
+              Log('Class : ' + E.ClassName);
+              Log('Error : ' + E.Message);
+            end;
+        end;
+      end;
+  finally
+    SS.Free;
+    LInStream.Free;
+    Result := Template;
+  end;
+end;
+
 
 end.

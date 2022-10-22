@@ -1,1 +1,54 @@
-[{"tfile":".gitignore","xlat":[]},{"tfile":"boss-lock.json","xlat":[]},{"tfile":"boss.json","xlat":["__PROJECT_GROUP_NAME__","__PROJECT_HOMEPAGE__","__PROJECT_DESCRIPTION__","__PROJECT_VERSION__","__PROJECTS__"]},{"tfile":"LICENSE","xlat":[]},{"tfile":"__PROJECT_GROUP_NAME__.groupproj","xlat":[]},{"tfile":"__PROJECT_GROUP_NAME__.prjmgc","xlat":[]},{"tfile":"README.md","xlat":["__PROJECT_TITLE__","__README__"]},{"tfile":"src\\__COMPONENT__\\__COMPONENT__.pas","xlat":["__COMPONENT__","__PUBLIC_PROPERTY__","__PACKAGE_NAME__","__PACKAGE_NAME_PIP__","__PACKAGE_NAME_CONDA__"]},{"tfile":"src\\__COMPONENT__\\__COMPONENT__Reg.pas","xlat":["__PALETTE_PAGE__","__COMPONENT__"]},{"tfile":"src\\__COMPONENT__\\__DCL____P4D____COMPONENT__.dpk","xlat":["__P4D__","__DCL__","__PALETTE_PAGE__","__COMPONENT__"]},{"tfile":"src\\__COMPONENT__\\__DCL____P4D____COMPONENT__.dproj","xlat":["__P4D__","__DCL__","__PALETTE_PAGE__","__COMPONENT__","__PALETTE_GUID__"]},{"tfile":"src\\__COMPONENT__\\__P4D____COMPONENT__.dpk","xlat":["__P4D__","__PALETTE_PAGE__","__COMPONENT__"]},{"tfile":"src\\__COMPONENT__\\__P4D____COMPONENT__.dproj","xlat":["__P4D__","__PALETTE_PAGE__","__COMPONENT__","__PACKAGE_GUID__"]}]
+[{
+        "tfile": ".gitignore",
+        "xlat": [],
+		"oneOff": true
+    }, {
+        "tfile": "boss-lock.json",
+        "xlat": [],
+		"oneOff": true
+    }, {
+        "tfile": "boss.json",
+        "xlat": ["__PROJECT_GROUP_NAME__", "__PROJECT_HOMEPAGE__", "__PROJECT_DESCRIPTION__", "__PROJECT_VERSION__", "__PROJECTS__"],
+		"oneOff": true
+    }, {
+        "tfile": "LICENSE",
+        "xlat": [],
+		"oneOff": true
+    }, {
+        "tfile": "__PROJECT_GROUP_NAME__.groupproj",
+        "xlat": [],
+		"oneOff": true
+    }, {
+        "tfile": "__PROJECT_GROUP_NAME__.prjmgc",
+        "xlat": [],
+		"oneOff": true
+    }, {
+        "tfile": "README.md",
+        "xlat": ["__PROJECT_TITLE__", "__README__"],
+		"oneOff": true
+    }, {
+        "tfile": "src\\__COMPONENT__\\__COMPONENT__.pas",
+        "xlat": ["__COMPONENT__", "__PUBLIC_PROPERTY__", "__PACKAGE_NAME__", "__PACKAGE_NAME_PIP__", "__PACKAGE_NAME_CONDA__"],
+		"oneOff": false
+    }, {
+        "tfile": "src\\__COMPONENT__\\__COMPONENT__Reg.pas",
+        "xlat": ["__PALETTE_PAGE__", "__COMPONENT__"],
+		"oneOff": false
+    }, {
+        "tfile": "src\\__COMPONENT__\\__DCL____P4D____COMPONENT__.dpk",
+        "xlat": ["__P4D__", "__DCL__", "__PALETTE_PAGE__", "__COMPONENT__"],
+		"oneOff": false
+    }, {
+        "tfile": "src\\__COMPONENT__\\__DCL____P4D____COMPONENT__.dproj",
+        "xlat": ["__P4D__", "__DCL__", "__PALETTE_PAGE__", "__COMPONENT__", "__PALETTE_GUID__"],
+		"oneOff": false
+    }, {
+        "tfile": "src\\__COMPONENT__\\__P4D____COMPONENT__.dpk",
+        "xlat": ["__P4D__", "__PALETTE_PAGE__", "__COMPONENT__"],
+		"oneOff": false
+    }, {
+        "tfile": "src\\__COMPONENT__\\__P4D____COMPONENT__.dproj",
+        "xlat": ["__P4D__", "__PALETTE_PAGE__", "__COMPONENT__", "__PACKAGE_GUID__"],
+		"oneOff": false
+    }
+]

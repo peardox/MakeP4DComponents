@@ -171,37 +171,81 @@ object MainForm: TMainForm
   object MainMenu1: TMainMenu
     Left = 56
     Top = 96
-    object MenuItem1: TMenuItem
+    object mnuFile: TMenuItem
       Text = 'File'
       object mnuOpenProject: TMenuItem
         Locked = True
+        ShortCut = 16463
         Text = 'Open Project'
         OnClick = mnuOpenProjectClick
       end
       object mnuSave: TMenuItem
         Locked = True
+        ShortCut = 16467
         Text = 'Save Project'
         OnClick = mnuSaveClick
       end
       object mnuResetProject: TMenuItem
         Locked = True
+        ShortCut = 16466
         Text = 'Reset Project'
         OnClick = mnuResetProjectClick
       end
       object mnuExport: TMenuItem
         Locked = True
+        ShortCut = 16453
         Text = 'Export Componemts'
         OnClick = mnuExportClick
       end
       object mnuSkipWebsiteChecks: TMenuItem
         Locked = True
+        ShortCut = 16471
         Text = 'Skip Website Checks'
         OnClick = mnuSkipWebsiteChecksClick
+      end
+      object mnuBug: TMenuItem
+        Locked = True
+        ShortCut = 16450
+        Text = 'Report a Bug'
+        OnClick = mnuBugClick
+      end
+      object mnuHelp: TMenuItem
+        Locked = True
+        ShortCut = 112
+        Text = 'Help'
+        OnClick = mnuHelpClick
       end
       object mnuExit: TMenuItem
         Locked = True
         Text = 'Exit'
         OnClick = mnuExitClick
+      end
+    end
+    object mnuAbout: TMenuItem
+      Text = 'Peardox'
+      object MenuItem1: TMenuItem
+        Locked = True
+        ShortCut = 16496
+        Text = 'Website'
+        OnClick = MenuItem1Click
+      end
+      object MenuItem2: TMenuItem
+        Locked = True
+        ShortCut = 16497
+        Text = 'Patreon'
+        OnClick = MenuItem2Click
+      end
+      object MenuItem3: TMenuItem
+        Locked = True
+        ShortCut = 16498
+        Text = 'Discord'
+        OnClick = MenuItem3Click
+      end
+      object MenuItem4: TMenuItem
+        Locked = True
+        ShortCut = 16499
+        Text = 'Tip Jar'
+        OnClick = MenuItem4Click
       end
     end
   end

@@ -11,23 +11,6 @@ uses
   Settings, FMX.Layouts;
 
 type
-  TTemplateFile = Class
-    TplFileName: String;
-    TplTemplate: String;
-    constructor Create(AFileName: string; ATemplate: String);
-  End;
-
-  TReplacementToken = Class
-    tfile: String;
-    xlat: TArray<String>;
-    constructor Create(AFile: string; AToken: TArray<String>);
-  end;
-  TReplacementTokens = TArray<TReplacementToken>;
-
-  TZipFileHelper = class helper for TZipFile
-    function ExtractToTemplate(Index: Integer): TTemplateFile; overload;
-  end;
-
   TCellImage = Class(TLayout)
   private
     FComponentSettings: TComponentSettings;
@@ -64,7 +47,7 @@ type
     lblComponents: TLabel;
     Rectangle2: TRectangle;
     MainMenu1: TMainMenu;
-    MenuItem1: TMenuItem;
+    mnuFile: TMenuItem;
     mnuOpenProject: TMenuItem;
     mnuSave: TMenuItem;
     mnuExit: TMenuItem;
@@ -81,6 +64,13 @@ type
     ContextMenu: TPopupMenu;
     mnuDeletePackage: TMenuItem;
     mnuSkipWebsiteChecks: TMenuItem;
+    mnuBug: TMenuItem;
+    mnuAbout: TMenuItem;
+    MenuItem1: TMenuItem;
+    MenuItem2: TMenuItem;
+    MenuItem3: TMenuItem;
+    MenuItem4: TMenuItem;
+    mnuHelp: TMenuItem;
     procedure btnAddComponentClick(Sender: TObject);
     procedure ExtractTemplateResourceZip;
     procedure ExtractReplacementResourceJson;
@@ -102,6 +92,12 @@ type
     procedure cbIncludePackageInfoChange(Sender: TObject);
     procedure mnuDeletePackageClick(Sender: TObject);
     procedure mnuSkipWebsiteChecksClick(Sender: TObject);
+    procedure mnuBugClick(Sender: TObject);
+    procedure MenuItem1Click(Sender: TObject);
+    procedure MenuItem2Click(Sender: TObject);
+    procedure MenuItem3Click(Sender: TObject);
+    procedure MenuItem4Click(Sender: TObject);
+    procedure mnuHelpClick(Sender: TObject);
   private
     { Private declarations }
     MarkedForDeletion: TCellImage;
@@ -133,6 +129,7 @@ implementation
 uses
   ComponentUnit,
   Math,
+  OSBrowser,
   System.Json.Serializers,
   System.IOUtils;
 
@@ -153,7 +150,6 @@ begin
   FImage.Position.Y := 20;
   FImage.Align := TAlignLayout.Bottom;
   FImage.OnMouseDown := HandleMouseDown;
-//  FImage.PopupMenu := Mainform.ContextMenu;
   FImage.Parent := Self;
 
   FCaption := TLabel.Create(Self);
@@ -203,6 +199,11 @@ begin
   MarkedForDeletion := Nil;
 end;
 
+procedure TMainForm.mnuBugClick(Sender: TObject);
+begin
+  TOSBrowser.Open('https://github.com/peardox/MakeP4DComponents/issues');
+end;
+
 procedure TMainForm.mnuDeletePackageClick(Sender: TObject);
 begin
   DeleteCellImage;
@@ -248,85 +249,6 @@ begin
           end;
         end;
     end;
-end;
-
-constructor TReplacementToken.Create(AFile: string; AToken: TArray<String>);
-begin
-  tfile := AFile;
-  xlat := AToken;
-end;
-
-constructor TTemplateFile.Create(AFileName: string; ATemplate: String);
-begin
-  Inherited Create;
-  TplFileName := AFileName;
-  TplTemplate := ATemplate;
-end;
-
-function TemplateSortFunc(Item1, Item2: Pointer): Integer;
-begin
-  Result := CompareText(TTemplateFile(Item1).TplFileName, TTemplateFile(Item2).TplFileName);
-end;
-
-function TokenSortFunc(Item1, Item2: Pointer): Integer;
-begin
-  Result := CompareText(TReplacementToken(Item1).tfile, TReplacementToken(Item2).tfile);
-end;
-
-Function TZipFileHelper.ExtractToTemplate(Index: Integer): TTemplateFile;
-var
-  LInStream: TStream;
-  LHeader: TZipHeader;
-  LFileName: string;
-  Template: TTemplateFile;
-  TemplateText: String;
-  SS: TStringStream;
-begin
-  SS := TStringStream.Create;
-  Template := Nil;
-  // Get decompression stream for file
-  Read(Index, LInStream, LHeader);
-  try
-    if not GetUTF8PathFromExtraField(LHeader, LFileName) then
-      LFileName := InternalGetFileName(Index);
-{$IFDEF MSWINDOWS} // ZIP stores files with '/', so translate to a relative Windows path.
-    LFileName := StringReplace(LFileName, '/', '\', [rfReplaceAll]);
-{$ENDIF}
-    // Open the File For output
-    if not (LFileName.Chars[LFileName.Length-1] = PathDelim) then
-      Begin
-        try // And Copy from the decompression stream.
-          // See Bit 3 at http://www.pkware.com/documents/casestudies/APPNOTE.TXT
-          if (LHeader.Flag and (1 shl 3)) = 0 then
-          begin
-            // Empty files should not be read
-            if LHeader.UncompressedSize > 0 then
-              begin
-                SS.CopyFrom(LInStream , 0);
-                TemplateText := SS.DataString;
-                Template := TTemplateFile.Create(LFileName, TemplateText);
-              end;
-          end
-          else
-          begin
-            SS.CopyFrom(LInStream , 0);
-            TemplateText := SS.DataString;
-            Template := TTemplateFile.Create(LFileName, TemplateText);
-          end;
-        except
-          on E: Exception do
-            begin
-              Log('Unhandled Exception in ExtractToTemplate');
-              Log('Class : ' + E.ClassName);
-              Log('Error : ' + E.Message);
-            end;
-        end;
-      end;
-  finally
-    SS.Free;
-    LInStream.Free;
-    Result := Template;
-  end;
 end;
 
 procedure TMainForm.mnuResetProjectClick(Sender: TObject);
@@ -444,7 +366,7 @@ begin
         for I := 0 to ReplacementList.Count -1 do
           begin
             Token := ReplacementList[I];
-            Log(IntToStr(I) + ' : ' + Token.tfile);
+            Log(IntToStr(I) + ' : ' + Token.tfile + ' : ' + BoolToStr(Token.oneOff, True));
             for J := 0 to Length(Token.xlat) -1 do
               begin
                 Log('  + ' + Token.xlat[J]);
@@ -615,6 +537,26 @@ begin
       end;
 end;
 
+procedure TMainForm.MenuItem1Click(Sender: TObject);
+begin
+  TOSBrowser.Open('https://peardox.com/delphi/');
+end;
+
+procedure TMainForm.MenuItem2Click(Sender: TObject);
+begin
+  TOSBrowser.Open('https://patreon.com/peardox');
+end;
+
+procedure TMainForm.MenuItem3Click(Sender: TObject);
+begin
+  TOSBrowser.Open('https://discord.gg/e2rGEEHrBd');
+end;
+
+procedure TMainForm.MenuItem4Click(Sender: TObject);
+begin
+  TOSBrowser.Open('https://www.paypal.com/donate/?hosted_button_id=XLCTBUMJRNQLL');
+end;
+
 procedure TMainForm.mnuSkipWebsiteChecksClick(Sender: TObject);
 begin
   SkipWebsiteChecks := not SkipWebsiteChecks;
@@ -645,6 +587,13 @@ end;
 procedure TMainForm.mnuExportClick(Sender: TObject);
 begin
   // Export
+  ShowMessage('Export');
+
+end;
+
+procedure TMainForm.mnuHelpClick(Sender: TObject);
+begin
+  TOSBrowser.Open('https://peardox.com/makep4dcomponents-help/');
 end;
 
 procedure TMainForm.mnuOpenProjectClick(Sender: TObject);
@@ -718,6 +667,9 @@ end;
 
 procedure TMainForm.FormCreate(Sender: TObject);
 begin
+  mnuExit.ShortCut := TextToShortcut('Alt+X');
+  mnuFile.ShortCut := TextToShortcut('Alt+F');
+
   LogStrings := TStringList.Create;;
   SkipWebsiteChecks := False;
 
