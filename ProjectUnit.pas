@@ -30,12 +30,18 @@ type
 
   TCellImage = Class(TLayout)
   private
+    FComponentSettings: TComponentSettings;
     FImage: TImage;
     FCaption: TLabel;
+    procedure CellEditComponentClick(Sender: TObject);
+    procedure HandleMouseDown(Sender: TObject; Button: TMouseButton;
+      Shift: TShiftState; X, Y: Single);
   public
     constructor Create(AOwner: TComponent); override;
+    destructor Destroy; override;
     property Image: TImage Read FImage Write FImage Default Nil;
     property Caption: TLabel Read FCaption Write FCaption Default Nil;
+    property ComponentSettings: TComponentSettings Read FComponentSettings Write FComponentSettings Default Nil;
   End;
 
   TMainForm = class(TForm)
@@ -72,6 +78,9 @@ type
     Button1: TButton;
     ComponentGrid: TGridLayout;
     cbIncludePackageInfo: TCheckBox;
+    ContextMenu: TPopupMenu;
+    mnuDeletePackage: TMenuItem;
+    mnuSkipWebsiteChecks: TMenuItem;
     procedure btnAddComponentClick(Sender: TObject);
     procedure ExtractTemplateResourceZip;
     procedure ExtractReplacementResourceJson;
@@ -85,15 +94,17 @@ type
     procedure edtProjectDescChange(Sender: TObject);
     procedure edtProjectHomepageChange(Sender: TObject);
     procedure edtPalettePageChange(Sender: TObject);
-    procedure CellEditComponentClick(Sender: TObject);
     procedure mnuResetProjectClick(Sender: TObject);
     procedure mnuOpenProjectClick(Sender: TObject);
     procedure mnuSaveClick(Sender: TObject);
     procedure mnuExitClick(Sender: TObject);
     procedure mnuExportClick(Sender: TObject);
     procedure cbIncludePackageInfoChange(Sender: TObject);
+    procedure mnuDeletePackageClick(Sender: TObject);
+    procedure mnuSkipWebsiteChecksClick(Sender: TObject);
   private
     { Private declarations }
+    MarkedForDeletion: TCellImage;
     TemplateList: TList;
     ReplacementList: TList;
     procedure FreeTemplateList;
@@ -102,6 +113,7 @@ type
     function EditPythonComponent(AComponent: TComponentSettings): Boolean;
     function AddPythonComponent(AComponent: TComponentSettings): Boolean;
     procedure FillComponentGrid;
+    procedure DeleteCellImage;
   public
     { Public declarations }
   end;
@@ -135,15 +147,107 @@ begin
   Margins.Bottom := 8;
   Margins.Right := 8;
 
+  FComponentSettings := Nil;
+
   FImage := TImage.Create(Self);
   FImage.Position.Y := 20;
   FImage.Align := TAlignLayout.Bottom;
+  FImage.OnMouseDown := HandleMouseDown;
+//  FImage.PopupMenu := Mainform.ContextMenu;
   FImage.Parent := Self;
 
   FCaption := TLabel.Create(Self);
   FCaption.TextSettings.HorzAlign := TTextAlign.Center;
-//  FCaption.Align := TAlignLayout.Fit;
   FCaption.Parent := Self;
+end;
+
+destructor TCellImage.Destroy;
+begin
+  FComponentSettings := Nil;
+  FImage.Free;
+  FCaption.Free;
+  Inherited Destroy;
+end;
+
+// Completely paranoid removal procedure
+procedure TMainForm.DeleteCellImage;
+var
+  I: Integer;
+  IDX: Integer;
+  CellImage: TCellImage;
+begin
+  IDX := -1;
+  CellImage := Nil;
+
+  if Length(ProjectSettings.ComponentSettings) > 0 then
+      if Assigned(ComponentGrid.Children) then
+          if ComponentGrid.Children.Count > 0 then
+              for I := 0 to ComponentGrid.Children.Count - 1 do
+                begin
+                  if ComponentGrid.Children[I] is TCellImage then
+                    if TCellImage(ComponentGrid.Children[I]) = MarkedForDeletion then
+                      begin
+                        IDX := I;
+                        CellImage := TCellImage(ComponentGrid.Children[I]);
+                        Break;
+                      end;
+                end;
+
+  if (IDX <> -1) and (CellImage = MarkedForDeletion) then
+    begin
+      ComponentGrid.Children[IDX].Free;
+      ProjectSettings.ComponentSettings[IDX].Free;
+      Delete(ProjectSettings.ComponentSettings, IDX, 1);
+    end;
+
+  MarkedForDeletion := Nil;
+end;
+
+procedure TMainForm.mnuDeletePackageClick(Sender: TObject);
+begin
+  DeleteCellImage;
+end;
+
+procedure TCellImage.HandleMouseDown(Sender: TObject; Button: TMouseButton;
+  Shift: TShiftState; X, Y: Single);
+var
+  PopLoc: TPointF;
+begin
+  if Button = TMouseButton.mbRight then
+    begin
+      PopLoc := Screen.MousePos;
+      MainForm.MarkedForDeletion := Self;
+      Mainform.ContextMenu.Popup(PopLoc.X, PopLoc.Y);
+    end
+  else if Button = TMouseButton.mbLeft then
+    begin
+      CellEditComponentClick(Sender);
+    end;
+end;
+
+procedure TCellImage.CellEditComponentClick(Sender: TObject);
+var
+  ExistingComponent: TComponentSettings;
+  ClickedIcon: TImage;
+  LBitmap: TBitmap;
+begin
+
+  ClickedIcon := TImage(Sender);
+  if Assigned(ClickedIcon) then
+    begin
+      ExistingComponent := ComponentSettings;
+      if MainForm.EditPythonComponent(ExistingComponent) then
+        begin
+          LBitmap := TBitmap.Create;
+          try
+            DecodeBase64Image(LBitmap, ExistingComponent.PackageIcon);
+            ClickedIcon.Bitmap.Assign(LBitmap);
+            Caption.Text := ExistingComponent.DelphiPackageName;
+          finally
+            LBitmap.Free;
+          end;
+        end;
+    end;
 end;
 
 constructor TReplacementToken.Create(AFile: string; AToken: TArray<String>);
@@ -424,13 +528,12 @@ begin
       try
         // Needs Refactoring
         CellImage := TCellImage.Create(ComponentGrid);
+        CellImage.ComponentSettings := NewComponent;
         IconImage := CellImage.Image;
         IconImage.Width := 128;
         IconImage.Height := 128;
         DecodeBase64Image(LBitmap, NewComponent.PackageIcon);
         IconImage.Bitmap.Assign(LBitmap);
-        IconImage.Tag := Length(ProjectSettings.ComponentSettings);
-        IconImage.OnClick := CellEditComponentClick;
         CellImage.Caption.Text := NewComponent.DelphiPackageName;
         ComponentGrid.AddObject(CellImage);
       finally
@@ -461,29 +564,7 @@ begin
     FreeAndNil(AComponent);
 end;
 
-procedure TMainForm.CellEditComponentClick(Sender: TObject);
-var
-  ExistingComponent: TComponentSettings;
-  ClickedIcon: TImage;
-  LBitmap: TBitmap;
-begin
-  ClickedIcon := TImage(Sender);
-  if Assigned(ClickedIcon) then
-    begin
-      ExistingComponent := ProjectSettings.ComponentSettings[ClickedIcon.Tag];
-      if EditPythonComponent(ExistingComponent) then
-        begin
-          LBitmap := TBitmap.Create;
-          try
-            DecodeBase64Image(LBitmap, ExistingComponent.PackageIcon);
-            ClickedIcon.Bitmap.Assign(LBitmap);
-          finally
-            LBitmap.Free;
-          end;
-        end;
-    end;
-end;
-
+// Returns true if Icon or Delphi Class name changed
 function TMainForm.EditPythonComponent(AComponent: TComponentSettings): Boolean;
 var
   CopyComponent: TComponentSettings;
@@ -500,7 +581,8 @@ begin
     MR := ComponentForm.ShowModal;
     if MR = mrOK then
       begin
-        if (AComponent.PackageIcon <> CopyComponent.PackageIcon) then
+        if (AComponent.PackageIcon <> CopyComponent.PackageIcon) or
+           (AComponent.DelphiPackageName <> CopyComponent.DelphiPackageName) then
           begin
             Result := True;
           end;
@@ -531,6 +613,12 @@ begin
           end;
         FreeAndNil(TemplateList);
       end;
+end;
+
+procedure TMainForm.mnuSkipWebsiteChecksClick(Sender: TObject);
+begin
+  SkipWebsiteChecks := not SkipWebsiteChecks;
+  mnuSkipWebsiteChecks.IsChecked  := SkipWebsiteChecks;
 end;
 
 procedure TMainForm.FreeReplacementList;
@@ -596,6 +684,7 @@ begin
           begin
             // Needs Refactoring
             CellImage := TCellImage.Create(ComponentGrid);
+            CellImage.ComponentSettings := ProjectSettings.ComponentSettings[I];
 
             IconImage := CellImage.Image;
             IconImage.Width := 128;
@@ -603,8 +692,6 @@ begin
 
             DecodeBase64Image(LBitmap, ProjectSettings.ComponentSettings[I].PackageIcon);
             IconImage.Bitmap.Assign(LBitmap);
-            IconImage.Tag := I;
-            IconImage.OnClick := CellEditComponentClick;
             CellImage.Caption.Text := ProjectSettings.ComponentSettings[I].DelphiPackageName;
 
             ComponentGrid.AddObject(CellImage);
@@ -632,6 +719,7 @@ end;
 procedure TMainForm.FormCreate(Sender: TObject);
 begin
   LogStrings := TStringList.Create;;
+  SkipWebsiteChecks := False;
 
   AppHome := IncludeTrailingPathDelimiter(System.IOUtils.TPath.GetHomePath) + AppName;
   if not DirectoryExists(AppHome) then

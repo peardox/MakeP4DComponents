@@ -42,6 +42,7 @@ var
   AppHome: String;
   ProjectSettings: TProjectSettings;
   LogStrings: TStringList;
+  SkipWebsiteChecks: Boolean;
 
 const
   DefaultProjectFile = 'WorkingProject.p4d';

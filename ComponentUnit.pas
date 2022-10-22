@@ -145,6 +145,11 @@ end;
 // possibilities
 function TComponentForm.CheckForWebsite(const AURL: String): Boolean;
 begin
+  if SkipWebsiteChecks or PreLoad then
+    begin
+      Result := True;
+      Exit;
+    end;
   Result := False;
 
   // Skip if URL is blank

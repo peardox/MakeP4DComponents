@@ -193,6 +193,11 @@ object MainForm: TMainForm
         Text = 'Export Componemts'
         OnClick = mnuExportClick
       end
+      object mnuSkipWebsiteChecks: TMenuItem
+        Locked = True
+        Text = 'Skip Website Checks'
+        OnClick = mnuSkipWebsiteChecksClick
+      end
       object mnuExit: TMenuItem
         Locked = True
         Text = 'Exit'
@@ -265,5 +270,13 @@ object MainForm: TMainForm
     TabOrder = 3
     Text = 'Append Package Optional Information to README.md'
     OnChange = cbIncludePackageInfoChange
+  end
+  object ContextMenu: TPopupMenu
+    Left = 496
+    Top = 96
+    object mnuDeletePackage: TMenuItem
+      Text = 'Delete Package'
+      OnClick = mnuDeletePackageClick
+    end
   end
 end
