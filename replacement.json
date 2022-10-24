@@ -8,7 +8,7 @@
 		"tmime": 0
     }, {
         "tfile": "__PROJECT_GROUP_NAME__.groupproj",
-        "xlat": [],
+        "xlat": ["__RUNTIME_PROJECTS__","__COMPONENT_PROJECTS__","__RUNTIME_TARGETS__","__COMPONENT_TARGETS__","__BUILD_LIST__","__CLEAN_LIST__","__MAKE_LIST__"],
 		"tmime": 0
     }, {
         "tfile": "__PROJECT_GROUP_NAME__.prjmgc",
@@ -16,7 +16,7 @@
 		"tmime": 0
     }, {
         "tfile": "README.md",
-        "xlat": ["__PROJECT_TITLE__", "__README__"],
+        "xlat": ["__PROJECT_TITLE__", "__README__","__WEB_URLS__"],
 		"tmime": 0
     }, {
         "tfile": "src\\__COMPONENT__\\__COMPONENT__.pas",
