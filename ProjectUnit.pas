@@ -52,7 +52,7 @@ type
     mnuSave: TMenuItem;
     mnuExit: TMenuItem;
     mnuResetProject: TMenuItem;
-    mnuExport: TMenuItem;
+    mnuExportDisk: TMenuItem;
     SaveProjectDialog: TSaveDialog;
     Panel2: TPanel;
     rectComponent: TRectangle;
@@ -63,7 +63,7 @@ type
     cbIncludePackageInfo: TCheckBox;
     ContextMenu: TPopupMenu;
     mnuDeletePackage: TMenuItem;
-    mnuSkipWebsiteChecks: TMenuItem;
+    mnuOfflineMode: TMenuItem;
     mnuBug: TMenuItem;
     mnuAbout: TMenuItem;
     MenuItem1: TMenuItem;
@@ -71,6 +71,8 @@ type
     MenuItem3: TMenuItem;
     MenuItem4: TMenuItem;
     mnuHelp: TMenuItem;
+    mnuExportZip: TMenuItem;
+    SaveExportZipDialog: TSaveDialog;
     procedure btnAddComponentClick(Sender: TObject);
     procedure ExtractTemplateResourceZip;
     procedure ExtractReplacementResourceJson;
@@ -88,16 +90,17 @@ type
     procedure mnuOpenProjectClick(Sender: TObject);
     procedure mnuSaveClick(Sender: TObject);
     procedure mnuExitClick(Sender: TObject);
-    procedure mnuExportClick(Sender: TObject);
+    procedure mnuExportDiskClick(Sender: TObject);
     procedure cbIncludePackageInfoChange(Sender: TObject);
     procedure mnuDeletePackageClick(Sender: TObject);
-    procedure mnuSkipWebsiteChecksClick(Sender: TObject);
+    procedure mnuOfflineModeClick(Sender: TObject);
     procedure mnuBugClick(Sender: TObject);
     procedure MenuItem1Click(Sender: TObject);
     procedure MenuItem2Click(Sender: TObject);
     procedure MenuItem3Click(Sender: TObject);
     procedure MenuItem4Click(Sender: TObject);
     procedure mnuHelpClick(Sender: TObject);
+    procedure mnuExportZipClick(Sender: TObject);
   private
     { Private declarations }
     MarkedForDeletion: TCellImage;
@@ -106,6 +109,7 @@ type
     procedure FreeTemplateList;
     procedure FreeReplacementList;
     procedure PopulateForm;
+    function ExportCheck: Boolean;
     function EditPythonComponent(AComponent: TComponentSettings): Boolean;
     function AddPythonComponent(AComponent: TComponentSettings): Boolean;
     procedure FillComponentGrid;
@@ -120,18 +124,20 @@ var
 const
   AppName = 'MakeP4DComponenets';
 
-
 implementation
 
 {$R *.fmx}
 {$R EmbeddedResources.RES}
 
 uses
+  ComponentExporter,
   ComponentUnit,
+  ConfirmForm,
   Math,
+  MessageForm,
   OSBrowser,
-  System.Json.Serializers,
-  System.IOUtils;
+  System.IOUtils,
+  System.Json.Serializers;
 
 constructor TCellImage.Create(AOwner: TComponent);
 begin
@@ -257,6 +263,7 @@ begin
     FreeAndNil(ProjectSettings);
   ProjectSettings := TProjectSettings.Create;
   PopulateForm;
+  FillComponentGrid;
 end;
 
 procedure TMainForm.mnuSaveClick(Sender: TObject);
@@ -557,10 +564,10 @@ begin
   TOSBrowser.Open('https://www.paypal.com/donate/?hosted_button_id=XLCTBUMJRNQLL');
 end;
 
-procedure TMainForm.mnuSkipWebsiteChecksClick(Sender: TObject);
+procedure TMainForm.mnuOfflineModeClick(Sender: TObject);
 begin
   SkipWebsiteChecks := not SkipWebsiteChecks;
-  mnuSkipWebsiteChecks.IsChecked  := SkipWebsiteChecks;
+  mnuOfflineMode.IsChecked  := SkipWebsiteChecks;
 end;
 
 procedure TMainForm.FreeReplacementList;
@@ -584,11 +591,140 @@ begin
   Application.Terminate;
 end;
 
-procedure TMainForm.mnuExportClick(Sender: TObject);
+function TMainForm.ExportCheck: Boolean;
+var
+  ErrorState : String;
 begin
-  // Export
-  ShowMessage('Export');
+  Result := True;
 
+  ErrorState := String.Empty;
+
+  if edtProjectTitle.Text = String.Empty then
+    ErrorState := ErrorState + 'The Project Title is missing' + sLineBreak;
+  if edtProjectVersion.Text = String.Empty then
+    ErrorState := ErrorState + 'The Project Version is missing' + sLineBreak;
+  if edtProjectGroupName.Text = String.Empty then
+    ErrorState := ErrorState + 'The Project Group Name is missing' + sLineBreak;
+  if edtProjectDesc.Text = String.Empty then
+    ErrorState := ErrorState + 'The Project Description is missing' + sLineBreak;
+  if edtPalettePage.Text = String.Empty then
+    ErrorState := ErrorState + 'The Delphi Palette Page is missing' + sLineBreak;
+
+  if ErrorState <> String.Empty then
+    begin
+      frmMessage.ModalResult := mrNone;
+      frmMessage.lblPrompt.Text := ErrorState;
+      frmMessage.ShowModal;
+      Result := False;
+    end;
+end;
+
+procedure TMainForm.mnuExportDiskClick(Sender: TObject);
+var
+  MR: TModalResult;
+  Dir: String;
+  WipeBeforeExport: Boolean;
+  Exporter: TFileExporter;
+  InitialDir: String;
+begin
+  Exporter := Nil; // Stupid 'might not have been initialized...'
+  WipeBeforeExport := False;
+  if ExportCheck then
+    begin
+    SaveExportZipDialog.Filename := ProjectSettings.ProjectGroupName + '.zip';
+
+    InitialDir := TPath.GetSharedDocumentsPath;
+    InitialDir := 'D:\Temp\ExportTest';
+    if SelectDirectory('Export Component Package as a Folder', InitialDir, Dir) then
+      begin
+        if DirectoryExists(Dir) then
+          begin
+            if not TDirectory.IsEmpty(Dir) then
+              begin
+                frmConfirm.ModalResult := mrNone;
+                frmConfirm.lblPrompt.Text := Dir + ' is not empty' +
+                  sLineBreak + sLineBreak + 'Do you want to erase it''s contents and' +
+                  sLineBreak +              'replace it with your Component Package';
+                MR := frmConfirm.ShowModal;
+                if MR = mrYes then
+                  begin
+                    WipeBeforeExport := True;
+                  end
+                else
+                  Exit;
+              end;
+            try
+              try
+                Exporter := TFileExporter.Create;
+                Exporter.WipeBeforeExport := WipeBeforeExport;
+                Exporter.Open(Dir);
+                // Exporter.Export;
+                Exporter.Close;
+              except
+                on E : Exception do
+                  begin
+                    Log('TMainForm.mnuExportDiskClick - Exception : Class = ' +
+                      E.ClassName + ', Message = ' + E.Message);
+                    Raise Exception.Create('TMainForm.mnuExportDiskClick - Exception : Class = ' +
+                      E.ClassName + ', Message = ' + E.Message);
+                  end;
+              end;
+            finally
+              Exporter.Free;
+            end;
+          end;
+      end;
+    end;
+end;
+
+procedure TMainForm.mnuExportZipClick(Sender: TObject);
+var
+  MR: TModalResult;
+  AllowOverWrite: Boolean;
+  Exporter: TZipExporter;
+begin
+  Exporter := Nil; // Stupid 'might not have been initialized...'
+  AllowOverWrite := False;
+  if ExportCheck then
+    begin
+    SaveExportZipDialog.Filename := ProjectSettings.ProjectGroupName + '.zip';
+
+    if SaveExportZipDialog.Execute then
+      begin
+        if FileExists(SaveExportZipDialog.Filename) then
+          begin
+            frmConfirm.ModalResult := mrNone;
+            frmConfirm.lblPrompt.Text := SaveExportZipDialog.Filename + ' alreasy exists' +
+              sLineBreak + sLineBreak + 'Do you want to overwrite the existing file?';
+            MR := frmConfirm.ShowModal;
+            if MR = mrYes then
+              begin
+                AllowOverWrite := True;
+              end
+            else
+              Exit;
+          end;
+        try
+          try
+            Exporter := TZipExporter.Create;
+            Exporter.AllowOverWrite := AllowOverWrite;
+            Exporter.Open(SaveExportZipDialog.Filename);
+//            Exporter.Export;
+            Exporter.Close;
+          except
+            on E : Exception do
+              begin
+                Log('TMainForm.mnuExportZipClick - Exception : Class = ' +
+                  E.ClassName + ', Message = ' + E.Message);
+                Raise Exception.Create('TMainForm.mnuExportZipClick - Exception : Class = ' +
+                  E.ClassName + ', Message = ' + E.Message);
+              end;
+          end;
+        finally
+          Exporter.Free;
+        end;
+      end;
+    end;
 end;
 
 procedure TMainForm.mnuHelpClick(Sender: TObject);
@@ -613,20 +749,19 @@ var
   LBitmap: TBitmap;
   CellImage: TCellImage;
 begin
-  if Length(ProjectSettings.ComponentSettings) > 0 then
+  if Assigned(ComponentGrid) and Assigned(ComponentGrid.Children) then
     begin
-
-      if Assigned(ComponentGrid.Children) then
+      if ComponentGrid.Children.Count > 0 then
         begin
-          if ComponentGrid.Children.Count > 0 then
+          for I := ComponentGrid.Children.Count - 1 downto 0 do
             begin
-              for I := ComponentGrid.Children.Count - 1 downto 0 do
-                begin
-                  ComponentGrid.Children[I].Free;
-                end;
+              ComponentGrid.Children[I].Free;
             end;
         end;
+    end;
 
+  if Length(ProjectSettings.ComponentSettings) > 0 then
+    begin
       LBitmap := TBitmap.Create;
       try
         for I := 0 to Length(ProjectSettings.ComponentSettings) - 1 do
@@ -665,13 +800,17 @@ begin
   LogStrings.Free;
 end;
 
+
 procedure TMainForm.FormCreate(Sender: TObject);
 begin
   mnuExit.ShortCut := TextToShortcut('Alt+X');
   mnuFile.ShortCut := TextToShortcut('Alt+F');
+  mnuExportDisk.ShortCut := TextToShortcut('Alt+E');
+  mnuExportZip.ShortCut := TextToShortcut('Alt+Z');
 
   LogStrings := TStringList.Create;;
   SkipWebsiteChecks := False;
+
 
   AppHome := IncludeTrailingPathDelimiter(System.IOUtils.TPath.GetHomePath) + AppName;
   if not DirectoryExists(AppHome) then
@@ -687,9 +826,13 @@ begin
   SaveProjectDialog.DefaultExt := '.p4d';
   SaveProjectDialog.InitialDir := AppHome;
 
+  SaveExportZipDialog.Filter:='Zip Archive (*.zip)|*zip';
+  SaveExportZipDialog.DefaultExt := '.zip';
+  SaveExportZipDialog.InitialDir := TPath.GetSharedDocumentsPath;
+  SaveExportZipDialog.Title := 'Export Component Package as a Zip File';
+
   edtProjectTitle.TextPrompt := 'This text will appear as the title of the README.md';
   edtProjectVersion.TextPrompt := 'e.g. 1.0.0';
-//  mmoReadMe.TextPrompt := '';
   edtProjectGroupName.TextPrompt := 'Your project''s main installation file';
   edtProjectDesc.TextPrompt := 'Short project description';
   edtProjectHomepage.TextPrompt := 'If you have one for it';
@@ -702,6 +845,23 @@ begin
 
   PopulateForm;
   FillComponentGrid;
+
+{
+  var zz: TZipExporter;
+  zz := TZipExporter.Create;
+  zz.WipeBeforeExport := True;
+  zz.Open('D:\Temp\ZipExport.zip');
+  zz.WriteFile('fred.txt', 'abcdef');
+  zz.WriteFile('bill/harry.txt', 'abcdef');
+  zz.WriteBitmap('aimage.bmp', ProjectSettings.ComponentSettings[0].PackageIcon);
+  zz.WriteBitmap('aimage.png', ProjectSettings.ComponentSettings[0].PackageIcon);
+  zz.WriteBitmap('aimage.jpg', ProjectSettings.ComponentSettings[0].PackageIcon);
+  zz.WriteBitmap('aimage-32.bmp', 32, ProjectSettings.ComponentSettings[0].PackageIcon);
+  zz.WriteBitmap('aimage-32.png', 32, ProjectSettings.ComponentSettings[0].PackageIcon);
+  zz.WriteBitmap('aimage-32.jpg', 32, ProjectSettings.ComponentSettings[0].PackageIcon);
+  zz.Close;
+  zz.Free;
+  }
 end;
 
 end.

@@ -176,37 +176,41 @@ object MainForm: TMainForm
       object mnuOpenProject: TMenuItem
         Locked = True
         ShortCut = 16463
-        Text = 'Open Project'
+        Text = '&Open Project'
         OnClick = mnuOpenProjectClick
       end
       object mnuSave: TMenuItem
         Locked = True
         ShortCut = 16467
-        Text = 'Save Project'
+        Text = '&Save Project'
         OnClick = mnuSaveClick
       end
       object mnuResetProject: TMenuItem
         Locked = True
         ShortCut = 16466
-        Text = 'Reset Project'
+        Text = '&Reset Project'
         OnClick = mnuResetProjectClick
       end
-      object mnuExport: TMenuItem
+      object mnuExportDisk: TMenuItem
         Locked = True
-        ShortCut = 16453
-        Text = 'Export Componemts'
-        OnClick = mnuExportClick
+        Text = '&Export To Disk'
+        OnClick = mnuExportDiskClick
       end
-      object mnuSkipWebsiteChecks: TMenuItem
+      object mnuExportZip: TMenuItem
         Locked = True
-        ShortCut = 16471
-        Text = 'Skip Website Checks'
-        OnClick = mnuSkipWebsiteChecksClick
+        Text = 'Export To &Zip'
+        OnClick = mnuExportZipClick
+      end
+      object mnuOfflineMode: TMenuItem
+        Locked = True
+        ShortCut = 16460
+        Text = 'Off&line Mode'
+        OnClick = mnuOfflineModeClick
       end
       object mnuBug: TMenuItem
         Locked = True
         ShortCut = 16450
-        Text = 'Report a Bug'
+        Text = 'Report a &Bug'
         OnClick = mnuBugClick
       end
       object mnuHelp: TMenuItem
@@ -217,7 +221,7 @@ object MainForm: TMainForm
       end
       object mnuExit: TMenuItem
         Locked = True
-        Text = 'Exit'
+        Text = 'E&xit'
         OnClick = mnuExitClick
       end
     end
@@ -322,5 +326,9 @@ object MainForm: TMainForm
       Text = 'Delete Package'
       OnClick = mnuDeletePackageClick
     end
+  end
+  object SaveExportZipDialog: TSaveDialog
+    Left = 624
+    Top = 96
   end
 end

@@ -122,6 +122,7 @@ end;
 constructor TProjectSettings.Create;
 begin
   Inherited Create;
+  ProjectVersion := '1.0.0';
 end;
 
 destructor TProjectSettings.Destroy;

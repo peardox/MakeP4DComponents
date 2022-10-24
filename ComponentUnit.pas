@@ -82,6 +82,7 @@ implementation
 {$R *.fmx}
 
 uses
+  MessageForm,
   OSBrowser,
   System.NetEncoding;
 
@@ -136,7 +137,11 @@ begin
   if ErrorState = String.Empty then
     ModalResult := mrOK
   else
-    ShowMessage(ErrorState);
+    begin
+      frmMessage.ModalResult := mrNone;
+      frmMessage.lblPrompt.Text := ErrorState;
+      frmMessage.ShowModal;
+    end;
 end;
 
 // Check if a website exists. This is important as edtDelphiPackageNameChange
