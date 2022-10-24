@@ -44,7 +44,6 @@ type
     edtProjectVersion: TEdit;
     lblPalettePage: TLabel;
     edtPalettePage: TEdit;
-    lblComponents: TLabel;
     Rectangle2: TRectangle;
     MainMenu1: TMainMenu;
     mnuFile: TMenuItem;
@@ -56,10 +55,8 @@ type
     SaveProjectDialog: TSaveDialog;
     Panel2: TPanel;
     rectComponent: TRectangle;
-    VertScrollBox1: TVertScrollBox;
     Panel3: TPanel;
     Button1: TButton;
-    ComponentGrid: TGridLayout;
     cbIncludePackageInfo: TCheckBox;
     ContextMenu: TPopupMenu;
     mnuDeletePackage: TMenuItem;
@@ -73,6 +70,8 @@ type
     mnuHelp: TMenuItem;
     mnuExportZip: TMenuItem;
     SaveExportZipDialog: TSaveDialog;
+    StyleBook1: TStyleBook;
+    ComponentGrid: TGridLayout;
     procedure btnAddComponentClick(Sender: TObject);
     procedure ExtractTemplateResourceZip;
     procedure ExtractReplacementResourceJson;
@@ -373,7 +372,7 @@ begin
         for I := 0 to ReplacementList.Count -1 do
           begin
             Token := ReplacementList[I];
-            Log(IntToStr(I) + ' : ' + Token.tfile + ' : ' + BoolToStr(Token.oneOff, True));
+            Log(IntToStr(I) + ' : ' + Token.tfile + ' : ' + IntToStr(Token.tmime));
             for J := 0 to Length(Token.xlat) -1 do
               begin
                 Log('  + ' + Token.xlat[J]);
@@ -658,7 +657,7 @@ begin
                 Exporter := TFileExporter.Create;
                 Exporter.WipeBeforeExport := WipeBeforeExport;
                 Exporter.Open(Dir);
-                // Exporter.Export;
+                Exporter.Export(TemplateList, ReplacementList);
                 Exporter.Close;
               except
                 on E : Exception do
@@ -709,7 +708,7 @@ begin
             Exporter := TZipExporter.Create;
             Exporter.AllowOverWrite := AllowOverWrite;
             Exporter.Open(SaveExportZipDialog.Filename);
-//            Exporter.Export;
+            Exporter.Export(TemplateList, ReplacementList);
             Exporter.Close;
           except
             on E : Exception do
@@ -805,8 +804,8 @@ procedure TMainForm.FormCreate(Sender: TObject);
 begin
   mnuExit.ShortCut := TextToShortcut('Alt+X');
   mnuFile.ShortCut := TextToShortcut('Alt+F');
-  mnuExportDisk.ShortCut := TextToShortcut('Alt+E');
-  mnuExportZip.ShortCut := TextToShortcut('Alt+Z');
+  mnuExportDisk.ShortCut := TextToShortcut('F2');
+  mnuExportZip.ShortCut := TextToShortcut('F3');
 
   LogStrings := TStringList.Create;;
   SkipWebsiteChecks := False;

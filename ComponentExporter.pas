@@ -3,6 +3,7 @@ unit ComponentExporter;
 interface
 
 uses
+  System.Classes,
   System.Zip;
 
 type
@@ -17,6 +18,11 @@ type
     destructor Destroy; override;
     procedure Open(const APath: String); virtual;
     procedure Close; virtual;
+    procedure Export(var TemplateList: TList; var ReplacementList: TList);
+    procedure WriteFile(const AFile: String; const AStr: String); virtual;
+    procedure WriteBitmap(const AFile: String; const ABase64Bitmap: String); overload; virtual;
+    procedure WriteBitmap(const AFile: String; const Size: Integer; const ABase64Bitmap: String); overload; virtual;
+    procedure WriteBitmap(const AFile: String; const AWidth: Integer; const AHeight: Integer; const ABase64Bitmap: String); overload; virtual;
     property AllowOverWrite: Boolean Read FAllowOverWrite Write FAllowOverWrite;
     property WipeBeforeExport: Boolean Read FWipeBeforeExport Write FWipeBeforeExport;
   End;
@@ -26,10 +32,10 @@ type
     constructor Create;
     destructor Destroy; override;
     procedure Open(const APath: String); override;
-    procedure WriteFile(const AFile: String; const AStr: String);
-    procedure WriteBitmap(const AFile: String; const ABase64Bitmap: String); overload;
-    procedure WriteBitmap(const AFile: String; const Size: Integer; const ABase64Bitmap: String); overload;
-    procedure WriteBitmap(const AFile: String; const AWidth: Integer; const AHeight: Integer; const ABase64Bitmap: String); overload;
+    procedure WriteFile(const AFile: String; const AStr: String); override;
+    procedure WriteBitmap(const AFile: String; const ABase64Bitmap: String); overload; override;
+    procedure WriteBitmap(const AFile: String; const Size: Integer; const ABase64Bitmap: String); overload; override;
+    procedure WriteBitmap(const AFile: String; const AWidth: Integer; const AHeight: Integer; const ABase64Bitmap: String); overload; override;
     procedure Close; override;
     function CheckPath(const AFileName: String): String;
   End;
@@ -41,10 +47,10 @@ type
     constructor Create;
     destructor Destroy; override;
     procedure Open(const APath: String); override;
-    procedure WriteFile(const AFile: String; const AStr: String);
-    procedure WriteBitmap(const AFile: String; const ABase64Bitmap: String); overload;
-    procedure WriteBitmap(const AFile: String; const Size: Integer; const ABase64Bitmap: String); overload;
-    procedure WriteBitmap(const AFile: String; const AWidth: Integer; const AHeight: Integer; const ABase64Bitmap: String); overload;
+    procedure WriteFile(const AFile: String; const AStr: String); override;
+    procedure WriteBitmap(const AFile: String; const ABase64Bitmap: String); overload; override;
+    procedure WriteBitmap(const AFile: String; const Size: Integer; const ABase64Bitmap: String); overload; override;
+    procedure WriteBitmap(const AFile: String; const AWidth: Integer; const AHeight: Integer; const ABase64Bitmap: String); overload; override;
     procedure Close; override;
   End;
 
@@ -54,10 +60,63 @@ uses
   FMX.Graphics,
   FMX.Surfaces,
   FMX.Types,
+  Replacements,
   Settings,
-  System.Classes,
   System.IOUtils,
   System.SysUtils;
+
+procedure TExporter.Export(var TemplateList: TList; var ReplacementList: TList);
+var
+  Template: TTemplateFile;
+  Tokens: TReplacementToken;
+  IDX: Integer;
+  Comp: Integer;
+  Rep: Integer;
+  ReplacedText: String;
+begin
+  // Sanity Check One
+  if TemplateList.Count <> ReplacementList.Count then
+    Raise Exception.Create('TExporter.Export - FileCount Error');
+
+  // Sanity Check Two
+  for IDX := 0 to ReplacementList.Count - 1 do
+    begin
+      Tokens := ReplacementList[IDX];
+      Template := TemplateList[IDX];
+      if Tokens.tfile <> Template.TplFileName then
+        Raise Exception.Create('TExporter.Export - File Order Error');
+    end;
+
+  for IDX := 0 to ReplacementList.Count - 1 do
+    begin
+      Tokens := ReplacementList[IDX];
+      Template := TemplateList[IDX];
+      if Tokens.tmime > 0 then
+        begin
+          for Comp := 0 to Length(ProjectSettings.ComponentSettings) - 1 do
+            begin
+              ReplacedText := FullCopy(Template.TplTemplate);
+              for Rep := 0 to Length(Tokens.xlat) - 1 do
+                begin
+                  ReplaceTokens(ReplacedText, Tokens.xlat[Rep], ProjectSettings.ComponentSettings[Comp]);
+                end;
+            end;
+
+        end;
+    end;
+
+
+{
+  WriteFile('fred.txt', 'abcdef');
+  WriteFile('bill/harry.txt', 'abcdef');
+  WriteBitmap('aimage.bmp', ProjectSettings.ComponentSettings[0].PackageIcon);
+  WriteBitmap('aimage.png', ProjectSettings.ComponentSettings[0].PackageIcon);
+  WriteBitmap('aimage.jpg', ProjectSettings.ComponentSettings[0].PackageIcon);
+  WriteBitmap('aimage-32.bmp', 32, ProjectSettings.ComponentSettings[0].PackageIcon);
+  WriteBitmap('aimage-32.png', 32, ProjectSettings.ComponentSettings[0].PackageIcon);
+  WriteBitmap('aimage-32.jpg', 32, ProjectSettings.ComponentSettings[0].PackageIcon);
+}
+end;
 
 constructor TExporter.Create;
 begin
@@ -78,6 +137,20 @@ begin
   FFileIsOpen := True;
 end;
 
+procedure TExporter.WriteFile(const AFile: String; const AStr: String);
+begin
+end;
+procedure TExporter.WriteBitmap(const AFile: String; const ABase64Bitmap: String);
+begin
+end;
+
+procedure TExporter.WriteBitmap(const AFile: String; const Size: Integer; const ABase64Bitmap: String);
+begin
+end;
+
+procedure TExporter.WriteBitmap(const AFile: String; const AWidth: Integer; const AHeight: Integer; const ABase64Bitmap: String);
+begin
+end;
 procedure TExporter.Close;
 begin
   FFileIsOpen := False;
@@ -146,7 +219,6 @@ end;
 procedure TFileExporter.WriteFile(const AFile: String; const AStr: String);
 var
   FullPath: String;
-  FilePath: String;
 begin
   try
     FullPath := CheckPath(AFile);

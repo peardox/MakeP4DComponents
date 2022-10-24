@@ -1,6 +1,6 @@
 ﻿<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
     <PropertyGroup>
-        <ProjectGuid>{8BED2FB2-EC9D-45DD-B081-C843A9B25B0B}</ProjectGuid>
+        <ProjectGuid>{__GROUPPROJ_GUID__}</ProjectGuid>
     </PropertyGroup>
     <ItemGroup>
         <Projects Include="src\Boto3\P4DBoto3.dproj">

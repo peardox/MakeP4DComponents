@@ -108,19 +108,19 @@
             <ResourceType>BITMAP</ResourceType>
             <ResourceId>T__COMPONENT__32</ResourceId>
         </RcItem>
-        <RcItem Include="..\..\images\png\24x24\__COMPONENT__.png">
+        <RcItem Include="..\..\images\png\24\__COMPONENT__.png">
             <ResourceType>RCDATA</ResourceType>
             <ResourceId>T__COMPONENT___PNG</ResourceId>
         </RcItem>
-        <RcItem Include="..\..\images\png\128x128\__COMPONENT__.png">
+        <RcItem Include="..\..\images\png\128\__COMPONENT__.png">
             <ResourceType>RCDATA</ResourceType>
             <ResourceId>T__COMPONENT__128_PNG</ResourceId>
         </RcItem>
-        <RcItem Include="..\..\images\png\16x16\__COMPONENT__.png">
+        <RcItem Include="..\..\images\png\16\__COMPONENT__.png">
             <ResourceType>RCDATA</ResourceType>
             <ResourceId>T__COMPONENT__16_PNG</ResourceId>
         </RcItem>
-        <RcItem Include="..\..\images\png\32x32\__COMPONENT__.png">
+        <RcItem Include="..\..\images\png\32\__COMPONENT__.png">
             <ResourceType>RCDATA</ResourceType>
             <ResourceId>T__COMPONENT__32_PNG</ResourceId>
         </RcItem>

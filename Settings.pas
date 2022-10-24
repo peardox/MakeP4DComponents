@@ -1,5 +1,7 @@
 unit Settings;
 
+// Also includes odds + sods functions etc
+
 interface
 
 uses
@@ -10,16 +12,22 @@ uses
 
 type
   TTemplateFile = Class
-    TplFileName: String;
-    TplTemplate: String;
+    TplFileName: String; // Filename
+    TplTemplate: String; // Template Text with replacement tokens
     constructor Create(AFileName: string; ATemplate: String);
   End;
 
+  //
   TReplacementToken = Class
-    tfile: String;
-    xlat: TArray<String>;
-    oneOff: Boolean;
-    constructor Create(AFile: string; AToken: TArray<String>; AOneOff: Boolean);
+    tfile: String; // Filename
+    xlat: TArray<String>; // The tokens that need replacing in this template
+    tmime: Integer; // A semi-bitmapped Mime-esque numbering system
+                    // 0 = One-Off file
+                    // 1 = Pascal File (pas)
+                    // 2 = Package File (dpk)
+                    // 3 = Project File (dproj)
+                    // Bit 2 : Set if part of component, unset if runtime
+    constructor Create(AFile: string; AToken: TArray<String>; ATMime: Integer);
   end;
   TReplacementTokens = TArray<TReplacementToken>;
 
@@ -72,6 +80,7 @@ procedure DecodeBase64Image(var ABitmap: TBitmap; Base64Image: String);
 procedure Log(const AMsg: String);
 function TokenSortFunc(Item1, Item2: Pointer): Integer;
 function TemplateSortFunc(Item1, Item2: Pointer): Integer;
+function FullCopy(const AStr: String): String;
 
 implementation
 
@@ -80,6 +89,11 @@ uses
   System.NetEncoding,
   System.SysUtils,
   System.Json.Serializers;
+
+function FullCopy(const AStr: String): String;
+begin
+  Result := Copy(AStr, 1, Length(AStr));
+end;
 
 procedure Log(const AMsg: String);
 begin
@@ -102,10 +116,6 @@ begin
 end;
 
 procedure TComponentSettings.CopyFrom(AObject: TComponentSettings);
-  function FullCopy(const AStr: String): String;
-  begin
-    Result := Copy(AStr, 1, Length(AStr));
-  end;
 begin
   DelphiPackageName := FullCopy(AObject.DelphiPackageName);
   PublicPackageName := FullCopy(AObject.PublicPackageName);
@@ -231,12 +241,12 @@ begin
   end;
 end;
 
-constructor TReplacementToken.Create(AFile: string; AToken: TArray<String>; AOneOff: Boolean);
+constructor TReplacementToken.Create(AFile: string; AToken: TArray<String>; ATMime: Integer);
 begin
   Inherited Create;
   tfile := AFile;
   xlat := AToken;
-  oneOff := AOneOff;
+  tmime := ATMime;
 end;
 
 constructor TTemplateFile.Create(AFileName: string; ATemplate: String);
