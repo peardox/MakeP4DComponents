@@ -6,7 +6,8 @@ uses
   System.SysUtils, System.Types, System.UITypes, System.Classes, System.Variants,
   FMX.Types, FMX.Controls, FMX.Forms, FMX.Graphics, FMX.Dialogs,
   FMX.Controls.Presentation, FMX.StdCtrls, FMX.Objects, FMX.Edit,
-  Settings, REST.Types, REST.Client, Data.Bind.Components, Data.Bind.ObjectScope;
+  Settings, REST.Types, REST.Client, Data.Bind.Components, Data.Bind.ObjectScope,
+  FMX.Memo.Types, FMX.ScrollBox, FMX.Memo;
 
 type
   TComponentForm = class(TForm)
@@ -44,6 +45,8 @@ type
     btnPyPiURL: TButton;
     btnDocURL: TButton;
     btnGithubURL: TButton;
+    lblPackageDesc: TLabel;
+    mmoPackageDesc: TMemo;
     procedure btnCancelClick(Sender: TObject);
     procedure btnSaveClick(Sender: TObject);
     procedure edtDelphiPackageNameChange(Sender: TObject);
@@ -61,6 +64,7 @@ type
     procedure btnPyPiURLClick(Sender: TObject);
     procedure btnDocURLClick(Sender: TObject);
     procedure btnGithubURLClick(Sender: TObject);
+    procedure mmoPackageDescChange(Sender: TObject);
   private
     { Private declarations }
     PreLoad: Boolean;
@@ -296,6 +300,11 @@ begin
     btnGithubURL.Enabled := False;
 end;
 
+procedure TComponentForm.mmoPackageDescChange(Sender: TObject);
+begin
+  ComponentSettings.PackageDesc := mmoPackageDesc.Text;
+end;
+
 // Load the data with existing entries if present. If this is a new record
 // then checking will occur when user starts filling it in so here we just
 // fill in everything verbatim turning on webpage buttons if not blank as
@@ -331,6 +340,8 @@ begin
   edtGithubURL.Text := ComponentSettings.GithubURL.Trim;
   if edtGithubURL.Text <> String.Empty then
     btnGithubURL.Enabled := True;
+
+  mmoPackageDesc.Text := ComponentSettings.PackageDesc;
 
   Preload := False;
 end;
@@ -380,6 +391,9 @@ begin
   AddOptional(lblPyPiURL);
   AddOptional(lblDocURL);
   AddOptional(lblGithubURL);
+  AddOptional(lblPackageDesc);
+
+  mmoPackageDesc.WordWrap := True;
 end;
 
 // If the user clicks on the icon and loads an image

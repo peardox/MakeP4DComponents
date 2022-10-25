@@ -1,2 +1,5 @@
 # __PROJECT_TITLE__
+
 __README__
+
+__WEB_URLS__

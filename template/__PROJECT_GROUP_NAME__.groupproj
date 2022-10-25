@@ -1,6 +1,6 @@
-﻿<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+<Project xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
     <PropertyGroup>
-        <ProjectGuid>{__GROUPPROJ_GUID__}</ProjectGuid>
+        <ProjectGuid>__GROUPPROJ_GUID__</ProjectGuid>
     </PropertyGroup>
     <ItemGroup>
 __RUNTIME_PROJECTS__

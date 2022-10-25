@@ -73,7 +73,30 @@ var
   Comp: Integer;
   Rep: Integer;
   ReplacedText: String;
+  ReplacedFileName: String;
+  CompNames: Array of String;
+  GroupProjIDX: Integer;
+  ReadMeIDX: Integer;
+  ConstructedRuntimeProjects: String;
+  ConstructedComponentProjects: String;
+  ConstructedRuntimeTargets: String;
+  ConstructedComponentTargets: String;
+  ConstructedBuildList: String;
+  ConstructedCleanList: String;
+  ConstructedMakeList: String;
+  ConstructedReadMe: String;
 begin
+  GroupProjIDX := -1;
+  ReadMeIDX := -1;
+  ConstructedRuntimeProjects := String.Empty;
+  ConstructedComponentProjects := String.Empty;
+  ConstructedRuntimeTargets := String.Empty;
+  ConstructedComponentTargets := String.Empty;
+  ConstructedBuildList := String.Empty;
+  ConstructedCleanList := String.Empty;
+  ConstructedMakeList := String.Empty;
+  ConstructedReadMe := String.Empty;
+
   // Sanity Check One
   if TemplateList.Count <> ReplacementList.Count then
     Raise Exception.Create('TExporter.Export - FileCount Error');
@@ -87,41 +110,164 @@ begin
         Raise Exception.Create('TExporter.Export - File Order Error');
     end;
 
+  // Replace tokens in component project files
   for IDX := 0 to ReplacementList.Count - 1 do
     begin
       Tokens := ReplacementList[IDX];
       Template := TemplateList[IDX];
-      if Tokens.tmime > 0 then
-        begin
-          for Comp := 0 to Length(ProjectSettings.ComponentSettings) - 1 do
-            begin
-              ReplacedText := FullCopy(Template.TplTemplate);
-              for Rep := 0 to Length(Tokens.xlat) - 1 do
-                begin
-                  ReplaceTokens(ReplacedText, Tokens.xlat[Rep], ProjectSettings.ComponentSettings[Comp]);
-                end;
-            end;
 
+      if Tokens.tmime = 0 then // Tokens.tmime = 0 is static filename + text so just copy write it
+        begin
+          ReplacedFileName := FullCopy(Template.TplFileName); // One file has a name alteration
+          RenameTemplateFile(ReplacedFileName);
+          WriteFile(ReplacedFileName, Template.TplTemplate);
+          Continue;
+        end;
+
+      if Tokens.tmime = 1024 then // Tokens.tmime = This projects .groupproj
+        begin
+          GroupProjIDX := IDX;
+          Continue;
+        end;
+
+      if Tokens.tmime = 1025 then // Tokens.tmime = This projects README.md
+        begin
+          ReadMeIDX := IDX;
+          Continue;
+        end;
+
+      for Comp := 0 to Length(ProjectSettings.ComponentSettings) - 1 do
+        begin
+          ReplacedFileName := FullCopy(Template.TplFileName);
+          ReplacedText := FullCopy(Template.TplTemplate);
+
+          for Rep := 0 to Length(Tokens.xlat) - 1 do
+            begin
+              ReplaceTokens(ReplacedText, Tokens.xlat[Rep], ProjectSettings.ComponentSettings[Comp]);
+              RenameTemplateFile(ReplacedFileName, ProjectSettings.ComponentSettings[Comp]);
+            end;
+          WriteFile(ReplacedFileName, ReplacedText);
         end;
     end;
 
+    // We need the Delphi Component name for each component
+    // Store then while doing the images for the Components
+    // The component names need to be known before the
+    // .groupproj is templated as some of the replacement
+    // text in them is lists of projects etc so these are
+    // built then replaced in the template
+    SetLength(CompNames, Length(ProjectSettings.ComponentSettings));
 
-{
-  WriteFile('fred.txt', 'abcdef');
-  WriteFile('bill/harry.txt', 'abcdef');
-  WriteBitmap('aimage.bmp', ProjectSettings.ComponentSettings[0].PackageIcon);
-  WriteBitmap('aimage.png', ProjectSettings.ComponentSettings[0].PackageIcon);
-  WriteBitmap('aimage.jpg', ProjectSettings.ComponentSettings[0].PackageIcon);
-  WriteBitmap('aimage-32.bmp', 32, ProjectSettings.ComponentSettings[0].PackageIcon);
-  WriteBitmap('aimage-32.png', 32, ProjectSettings.ComponentSettings[0].PackageIcon);
-  WriteBitmap('aimage-32.jpg', 32, ProjectSettings.ComponentSettings[0].PackageIcon);
-}
+    // Create images based on the names of all components
+    // using the 128x128 PackageIcon held in each ComponentSetting record.
+    for Comp := 0 to Length(ProjectSettings.ComponentSettings) - 1 do
+      begin
+        CompNames[Comp] := ProjectSettings.ComponentSettings[Comp].DelphiPackageName;
+
+        ReplacedFileName := '__COMPONENT__';
+        RenameTemplateFile(ReplacedFileName, ProjectSettings.ComponentSettings[Comp]);
+        WriteBitmap('images/bmp/128/' + ReplacedFileName + '.bmp', 128, ProjectSettings.ComponentSettings[Comp].PackageIcon);
+        WriteBitmap('images/png/128/' + ReplacedFileName + '.png', 128, ProjectSettings.ComponentSettings[Comp].PackageIcon);
+        WriteBitmap('images/bmp/32/' + ReplacedFileName + '.bmp', 32, ProjectSettings.ComponentSettings[Comp].PackageIcon);
+        WriteBitmap('images/png/32/' + ReplacedFileName + '.png', 32, ProjectSettings.ComponentSettings[Comp].PackageIcon);
+        WriteBitmap('images/bmp/24/' + ReplacedFileName + '.bmp', 24, ProjectSettings.ComponentSettings[Comp].PackageIcon);
+        WriteBitmap('images/png/24/' + ReplacedFileName + '.png', 24, ProjectSettings.ComponentSettings[Comp].PackageIcon);
+        WriteBitmap('images/bmp/16/' + ReplacedFileName + '.bmp', 16, ProjectSettings.ComponentSettings[Comp].PackageIcon);
+        WriteBitmap('images/png/16/' + ReplacedFileName + '.png', 16, ProjectSettings.ComponentSettings[Comp].PackageIcon);
+
+        ConstructedRuntimeProjects := ConstructedRuntimeProjects + RuntimeProjects;
+        for Rep := 0 to Length(ConstructedReplacements) - 1 do
+          ReplaceTokens(ConstructedRuntimeProjects, ConstructedReplacements[Rep], ProjectSettings.ComponentSettings[Comp]);
+
+        ConstructedComponentProjects := ConstructedComponentProjects + ComponentProjects;
+        for Rep := 0 to Length(ConstructedReplacements) - 1 do
+          ReplaceTokens(ConstructedComponentProjects, ConstructedReplacements[Rep], ProjectSettings.ComponentSettings[Comp]);
+
+        ConstructedRuntimeTargets := ConstructedRuntimeTargets + RuntimeTargets;
+        for Rep := 0 to Length(ConstructedReplacements) - 1 do
+          ReplaceTokens(ConstructedRuntimeTargets, ConstructedReplacements[Rep], ProjectSettings.ComponentSettings[Comp]);
+
+        ConstructedComponentTargets := ConstructedComponentTargets + ComponentTargets;
+        for Rep := 0 to Length(ConstructedReplacements) - 1 do
+          ReplaceTokens(ConstructedComponentTargets, ConstructedReplacements[Rep], ProjectSettings.ComponentSettings[Comp]);
+
+
+        if Comp <> 0 then
+          ConstructedBuildList := ConstructedBuildList + ';';
+        ConstructedBuildList := ConstructedBuildList + BuildComponentList;
+        for Rep := 0 to Length(ConstructedReplacements) - 1 do
+          ReplaceTokens(ConstructedBuildList, ConstructedReplacements[Rep], ProjectSettings.ComponentSettings[Comp]);
+
+        if Comp <> 0 then
+          ConstructedCleanList := ConstructedCleanList + ';';
+        ConstructedCleanList := ConstructedCleanList + CleanComponentList;
+        for Rep := 0 to Length(ConstructedReplacements) - 1 do
+          ReplaceTokens(ConstructedCleanList, ConstructedReplacements[Rep], ProjectSettings.ComponentSettings[Comp]);
+
+        if Comp <> 0 then
+          ConstructedMakeList := ConstructedMakeList + ';';
+        ConstructedMakeList := ConstructedMakeList + MakeComponentList;
+        for Rep := 0 to Length(ConstructedReplacements) - 1 do
+          ReplaceTokens(ConstructedMakeList, ConstructedReplacements[Rep], ProjectSettings.ComponentSettings[Comp]);
+
+        ConstructedReadMe := ConstructedReadMe + '![' + ProjectSettings.ComponentSettings[Comp].DelphiPackageName + '](images/png/128/' + ProjectSettings.ComponentSettings[Comp].DelphiPackageName + '.png)' + sLineBreak;
+        if ProjectSettings.ComponentSettings[Comp].PackageDesc = String.Empty then
+          ConstructedReadMe := ConstructedReadMe + '* **' + ProjectSettings.ComponentSettings[Comp].DelphiPackageName + '**' + sLineBreak
+        else
+          ConstructedReadMe := ConstructedReadMe + '* **' + ProjectSettings.ComponentSettings[Comp].DelphiPackageName + '** - ' + ProjectSettings.ComponentSettings[Comp].PackageDesc + sLineBreak;
+        if ProjectSettings.ComponentSettings[Comp].HomeURL <> String.Empty then
+          ConstructedReadMe := ConstructedReadMe + '' + sLineBreak;
+        if ProjectSettings.ComponentSettings[Comp].PyPiURL <> String.Empty then
+          ConstructedReadMe := ConstructedReadMe  + '' + sLineBreak;
+        if ProjectSettings.ComponentSettings[Comp].DocURL <> String.Empty then
+          ConstructedReadMe := ConstructedReadMe  + '' + sLineBreak;
+        if ProjectSettings.ComponentSettings[Comp].GithubURL <> String.Empty then
+          ConstructedReadMe := ConstructedReadMe  + '' + sLineBreak;
+        ConstructedReadMe := ConstructedReadMe  + sLineBreak;
+      end;
+
+    Tokens := ReplacementList[GroupProjIDX];
+    Template := TemplateList[GroupProjIDX];
+    ReplacedFileName := FullCopy(Template.TplFileName);
+    ReplacedText := FullCopy(Template.TplTemplate);
+    RenameTemplateFile(ReplacedFileName);
+
+    // Replace in groupproj
+    ReplacedText := ReplacedText.Replace('__RUNTIME_PROJECTS__', ConstructedRuntimeProjects);
+    ReplacedText := ReplacedText.Replace('__COMPONENT_PROJECTS__', ConstructedComponentProjects);
+    ReplacedText := ReplacedText.Replace('__RUNTIME_TARGETS__', ConstructedRuntimeTargets);
+    ReplacedText := ReplacedText.Replace('__COMPONENT_TARGETS__', ConstructedComponentTargets);
+
+    ReplacedText := ReplacedText.Replace('__BUILD_LIST__', ConstructedBuildList);
+    ReplacedText := ReplacedText.Replace('__CLEAN_LIST__', ConstructedCleanList);
+    ReplacedText := ReplacedText.Replace('__MAKE_LIST__', ConstructedMakeList);
+
+    for Rep := 0 to Length(Tokens.xlat) - 1 do
+      ReplaceTokens(ReplacedText, Tokens.xlat[Rep]);
+
+    // And write it
+    WriteFile(ReplacedFileName, ReplacedText);
+
+    Tokens := ReplacementList[ReadMeIDX];
+    Template := TemplateList[ReadMeIDX];
+    ReplacedFileName := FullCopy(Template.TplFileName);
+    ReplacedText := FullCopy(Template.TplTemplate);
+    RenameTemplateFile(ReplacedFileName);
+
+    // Replace groupproj
+    for Rep := 0 to Length(Tokens.xlat) - 1 do
+      ReplaceTokens(ReplacedText, Tokens.xlat[Rep]);
+    ReplacedText := ReplacedText.Replace('__WEB_URLS__', ConstructedReadMe);
+
+    WriteFile(ReplacedFileName, ReplacedText);
+
+    SetLength(CompNames, 0);
 end;
 
 constructor TExporter.Create;
 begin
   Inherited Create;
-  FFilePath := '';
+  FFilePath := String.Empty;
   FAllowOverWrite := False;
   FWipeBeforeExport := False;
 end;
@@ -278,12 +424,8 @@ end;
 
 procedure TFileExporter.Close;
 begin
-  if FFileIsOpen then
-    Log('File is open but who cares?');
   Log('TFileExporter.Close');
   Inherited;
-  if not FFileIsOpen then
-    Log('File is marked as closed');
 end;
 
 constructor TZipExporter.Create;

@@ -6,7 +6,7 @@ uses
   System.SysUtils, System.Types, System.UITypes, System.Classes, System.Variants,
   FMX.Types, FMX.Controls, FMX.Forms, FMX.Graphics, FMX.Dialogs, FMX.Memo.Types,
   System.Zip, FMX.Controls.Presentation, FMX.ScrollBox, FMX.Memo, FMX.StdCtrls,
-  PyCommon, PyModule, PyPackage, H5Py, FMX.Edit, System.Rtti, FMX.Grid.Style,
+  FMX.Edit, System.Rtti, FMX.Grid.Style,
   FMX.Grid, FMX.Menus, FMX.Objects,
   Settings, FMX.Layouts;
 
@@ -806,6 +806,7 @@ begin
   mnuFile.ShortCut := TextToShortcut('Alt+F');
   mnuExportDisk.ShortCut := TextToShortcut('F2');
   mnuExportZip.ShortCut := TextToShortcut('F3');
+  mmoReadMe.WordWrap := True;
 
   LogStrings := TStringList.Create;;
   SkipWebsiteChecks := False;

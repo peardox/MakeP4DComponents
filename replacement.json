@@ -8,16 +8,16 @@
 		"tmime": 0
     }, {
         "tfile": "__PROJECT_GROUP_NAME__.groupproj",
-        "xlat": ["__RUNTIME_PROJECTS__","__COMPONENT_PROJECTS__","__RUNTIME_TARGETS__","__COMPONENT_TARGETS__","__BUILD_LIST__","__CLEAN_LIST__","__MAKE_LIST__"],
-		"tmime": 0
+        "xlat": ["__GROUPPROJ_GUID__"],
+		"tmime": 1024
     }, {
         "tfile": "__PROJECT_GROUP_NAME__.prjmgc",
         "xlat": [],
 		"tmime": 0
     }, {
         "tfile": "README.md",
-        "xlat": ["__PROJECT_TITLE__", "__README__","__WEB_URLS__"],
-		"tmime": 0
+        "xlat": ["__PROJECT_TITLE__", "__README__"],
+		"tmime": 1025
     }, {
         "tfile": "src\\__COMPONENT__\\__COMPONENT__.pas",
         "xlat": ["__COMPONENT__", "__PUBLIC_PROPERTY__", "__PACKAGE_NAME__", "__PACKAGE_NAME_PIP__", "__PACKAGE_NAME_CONDA__"],

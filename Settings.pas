@@ -45,6 +45,7 @@ type
     PyPiURL: String;
     DocURL: String;
     GithubURL: String;
+    PackageDesc: String;
     PackageIcon: String;
     constructor Create;
     procedure CopyFrom(AObject: TComponentSettings);
@@ -126,6 +127,7 @@ begin
   PyPiURL := FullCopy(AObject.PyPiURL);
   DocURL := FullCopy(AObject.DocURL);
   GithubURL := FullCopy(AObject.GithubURL);
+  PackageDesc := FullCopy(AObject.PackageDesc);
   PackageIcon := FullCopy(AObject.PackageIcon);
 end;
 

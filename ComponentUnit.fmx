@@ -4,7 +4,7 @@ object ComponentForm: TComponentForm
   BorderIcons = []
   BorderStyle = Single
   Caption = 'Add New Package'
-  ClientHeight = 412
+  ClientHeight = 578
   ClientWidth = 640
   Position = OwnerFormCenter
   FormFactor.Width = 320
@@ -14,7 +14,7 @@ object ComponentForm: TComponentForm
   DesignerMasterStyle = 0
   object Panel1: TPanel
     Align = Bottom
-    Position.Y = 372.000000000000000000
+    Position.Y = 538.000000000000000000
     Size.Width = 640.000000000000000000
     Size.Height = 40.000000000000000000
     Size.PlatformDefault = False
@@ -67,7 +67,7 @@ object ComponentForm: TComponentForm
     Position.X = 16.000000000000000000
     Position.Y = 16.000000000000000000
     Text = 'Delphi Class Name'
-    TabOrder = 22
+    TabOrder = 23
   end
   object edtDelphiPackageName: TEdit
     Touch.InteractiveGestures = [LongTap, DoubleTap]
@@ -83,7 +83,7 @@ object ComponentForm: TComponentForm
     Position.X = 16.000000000000000000
     Position.Y = 56.000000000000000000
     Text = 'Property Name'
-    TabOrder = 21
+    TabOrder = 22
   end
   object edtPublicPackageName: TEdit
     Touch.InteractiveGestures = [LongTap, DoubleTap]
@@ -112,7 +112,7 @@ object ComponentForm: TComponentForm
     Size.Height = 17.000000000000000000
     Size.PlatformDefault = False
     Text = 'Package Name (Python)'
-    TabOrder = 20
+    TabOrder = 21
   end
   object edtPIPPackageName: TEdit
     Touch.InteractiveGestures = [LongTap, DoubleTap]
@@ -128,7 +128,7 @@ object ComponentForm: TComponentForm
     Position.X = 16.000000000000000000
     Position.Y = 136.000000000000000000
     Text = 'Package Name (PIP)'
-    TabOrder = 19
+    TabOrder = 20
   end
   object edtCondaPackageName: TEdit
     Touch.InteractiveGestures = [LongTap, DoubleTap]
@@ -147,7 +147,7 @@ object ComponentForm: TComponentForm
     Size.Height = 17.000000000000000000
     Size.PlatformDefault = False
     Text = 'Package Name (Conda)'
-    TabOrder = 18
+    TabOrder = 19
   end
   object lblType: TLabel
     StyledSettings = [Family, Size, FontColor]
@@ -159,13 +159,13 @@ object ComponentForm: TComponentForm
     TextSettings.Font.StyleExt = {00070000000000000004000000}
     TextSettings.HorzAlign = Center
     Text = 'T'
-    TabOrder = 38
+    TabOrder = 39
   end
   object lblPyPiURL: TLabel
     Position.X = 16.000000000000000000
     Position.Y = 256.000000000000000000
     Text = 'PyPi URL'
-    TabOrder = 17
+    TabOrder = 18
   end
   object edtPyPiURL: TEdit
     Touch.InteractiveGestures = [LongTap, DoubleTap]
@@ -191,7 +191,7 @@ object ComponentForm: TComponentForm
     Position.X = 16.000000000000000000
     Position.Y = 296.000000000000000000
     Text = 'Documentation URL'
-    TabOrder = 15
+    TabOrder = 16
   end
   object edtGithubURL: TEdit
     Touch.InteractiveGestures = [LongTap, DoubleTap]
@@ -207,7 +207,7 @@ object ComponentForm: TComponentForm
     Position.X = 16.000000000000000000
     Position.Y = 336.000000000000000000
     Text = 'Github URL'
-    TabOrder = 14
+    TabOrder = 15
   end
   object Label3: TLabel
     Position.X = 496.000000000000000000
@@ -217,7 +217,7 @@ object ComponentForm: TComponentForm
     Size.PlatformDefault = False
     TextSettings.HorzAlign = Center
     Text = 'Click To Change Image'
-    TabOrder = 39
+    TabOrder = 40
   end
   object OpenIconDialog: TOpenDialog
     Left = 432
@@ -230,7 +230,7 @@ object ComponentForm: TComponentForm
     Size.Height = 17.000000000000000000
     Size.PlatformDefault = False
     Text = 'Package Homepage'
-    TabOrder = 16
+    TabOrder = 17
   end
   object edtHomeURL: TEdit
     Touch.InteractiveGestures = [LongTap, DoubleTap]
@@ -279,8 +279,28 @@ object ComponentForm: TComponentForm
     Text = 'Open'
     OnClick = btnGithubURLClick
   end
+  object lblPackageDesc: TLabel
+    Position.X = 16.000000000000000000
+    Position.Y = 376.000000000000000000
+    Text = 'Package Description'
+    TabOrder = 14
+  end
+  object mmoPackageDesc: TMemo
+    Touch.InteractiveGestures = [Pan, LongTap, DoubleTap]
+    DataDetectorTypes = []
+    OnChange = mmoPackageDescChange
+    Position.X = 152.000000000000000000
+    Position.Y = 376.000000000000000000
+    Size.Width = 425.000000000000000000
+    Size.Height = 145.000000000000000000
+    Size.PlatformDefault = False
+    TabOrder = 45
+    Viewport.Width = 425.000000000000000000
+    Viewport.Height = 145.000000000000000000
+  end
   object RESTClient: TRESTClient
     Params = <>
+    SynchronizedEvents = False
     Left = 432
     Top = 64
   end
@@ -288,6 +308,7 @@ object ComponentForm: TComponentForm
     Client = RESTClient
     Params = <>
     Response = RESTResponse
+    SynchronizedEvents = False
     Left = 432
     Top = 112
   end

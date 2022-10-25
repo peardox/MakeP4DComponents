@@ -5,18 +5,66 @@ interface
 uses
   System.SysUtils, Settings;
 
-procedure ReplaceTokens(var AStr: String; const AToken: String; const Component: TComponentSettings = Nil);
-function RenameTemplateFile(const ATeokenisedFilename: String; const Component: TComponentSettings = Nil): String;
+resourcestring
+  // __RUNTIME_PROJECTS__
+  RuntimeProjects = '        <Projects Include="src\__COMPONENT__\__P4D____COMPONENT__.dproj">' + sLineBreak +
+                    '            <Dependencies/>' + sLineBreak +
+                    '        </Projects>' + sLineBreak;
 
-implementation
+  // __COMPONENT_PROJECTS__
+  ComponentProjects = '        <Projects Include="src\__COMPONENT__\__DCL____P4D____COMPONENT__.dproj">' + sLineBreak +
+                      '            <Dependencies/>' + sLineBreak +
+                      '        </Projects>' + sLineBreak;
 
-var
+  //__RUNTIME_TARGETS__
+  RuntimeTargets =  '    <Target Name="__P4D____COMPONENT__">' + sLineBreak +
+                    '        <MSBuild Projects="src\__COMPONENT__\__P4D____COMPONENT__.dproj"/>' + sLineBreak +
+                    '    </Target>' + sLineBreak +
+                    '    <Target Name="__P4D____COMPONENT__:Clean">' + sLineBreak +
+                    '        <MSBuild Projects="src\__COMPONENT__\__P4D____COMPONENT__.dproj" Targets="Clean"/>' + sLineBreak +
+                    '    </Target>' + sLineBreak +
+                    '    <Target Name="__P4D____COMPONENT__:Make">' + sLineBreak +
+                    '        <MSBuild Projects="src\__COMPONENT__\__P4D____COMPONENT__.dproj" Targets="Make"/>' + sLineBreak +
+                    '    </Target>' + sLineBreak;
+
+  //__COMPONENT_TARGETS__
+  ComponentTargets =  '    <Target Name="__DCL____P4D____COMPONENT__">' + sLineBreak +
+                      '        <MSBuild Projects="src\__COMPONENT__\__DCL____P4D____COMPONENT__.dproj"/>' + sLineBreak +
+                      '    </Target>' + sLineBreak +
+                      '    <Target Name="__DCL____P4D____COMPONENT__:Clean">' + sLineBreak +
+                      '        <MSBuild Projects="src\__COMPONENT__\__DCL____P4D____COMPONENT__.dproj" Targets="Clean"/>' + sLineBreak +
+                      '    </Target>' + sLineBreak +
+                      '    <Target Name="__DCL____P4D____COMPONENT__:Make">' + sLineBreak +
+                      '        <MSBuild Projects="src\__COMPONENT__\__DCL____P4D____COMPONENT__.dproj" Targets="Make"/>' + sLineBreak +
+                      '    </Target>' + sLineBreak;
+
+  //__BUILD_COMPONENT_LIST__
+  BuildComponentList = '__P4D____COMPONENT__;__DCL____P4D____COMPONENT__';
+
+  //__CLEAN_COMPONENT_LIST__
+  CleanComponentList = '__P4D____COMPONENT__:Clean;__DCL____P4D____COMPONENT__:Clean';
+
+  // __MAKE_COMPONENT_LIST__
+  MakeComponentList = '__P4D____COMPONENT__:Make;__DCL____P4D____COMPONENT__:Make';
+
+const
   FileNameReplacements: TArray<String> = [
     '__DCL__',
     '__COMPONENT__',
     '__P4D__',
     '__PROJECT_GROUP_NAME__'
   ];
+
+  ConstructedReplacements: TArray<String> = [
+    '__DCL__',
+    '__COMPONENT__',
+    '__P4D__'
+  ];
+
+procedure ReplaceTokens(var AStr: String; const AToken: String; const Component: TComponentSettings = Nil);
+procedure RenameTemplateFile(var ATokenisedFilename: String; const Component: TComponentSettings = Nil);
+
+implementation
 
 function GetRandomGUID(const PackageID: String; const IsPaletteGUID: Boolean): String;
 var
@@ -61,17 +109,21 @@ begin
     if Token = '__DCL__' then
       Result := 'dcl'
     else if Token = '__P4D__' then
-      Result := 'p4d'
-    else if Token = '__PALETTE_TITLE__' then
-      Result := ProjectSettings.ProjectTitle
+      Result := 'P4D'
+    else if Token = '__PALETTE_PAGE__' then
+      Result := ProjectSettings.PalettePage
     else if Token = '__PROJECT_VERSION__' then
       Result := ProjectSettings.ProjectVersion
+    else if Token = '__PROJECT_TITLE__' then
+      Result := ProjectSettings.ProjectTitle
     else if Token = '__README__' then
       Result := ProjectSettings.ReadMe
     else if Token = '__PROJECT_GROUP_NAME__' then
       Result := ProjectSettings.ProjectGroupName
     else if Token = '__PROJECT_DESCRIPTION__' then
       Result := ProjectSettings.ProjectDesc
+    else if Token = '__GROUPPROJ_GUID__' then
+      Result := GetRandomGUID(ProjectSettings.ProjectGroupName, False)
     else if Token = '__PROJECT_HOMEPAGE__' then
       Result := ProjectSettings.ProjectHomepage;
     end;
@@ -80,16 +132,15 @@ end;
 
 procedure ReplaceTokens(var AStr: String; const AToken: String; const Component: TComponentSettings = Nil);
 begin
-  AStr.Replace(AToken, ReplaceToken(AToken, Component), [rfReplaceAll]);
+  AStr := AStr.Replace(AToken, ReplaceToken(AToken, Component), [rfReplaceAll]);
 end;
 
-function RenameTemplateFile(const ATeokenisedFilename: String; const Component: TComponentSettings = Nil): String;
+procedure RenameTemplateFile(var ATokenisedFilename: String; const Component: TComponentSettings = Nil);
 var
   I: Integer;
 begin
-  Result := '';
   for I := 0 to Length(FileNameReplacements) - 1 do
-    ReplaceTokens(Result, FileNameReplacements[I], Component);
+    ReplaceTokens(ATokenisedFilename, FileNameReplacements[I], Component);
 end;
 
 
