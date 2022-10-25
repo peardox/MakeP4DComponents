@@ -210,20 +210,20 @@ begin
         for Rep := 0 to Length(ConstructedReplacements) - 1 do
           ReplaceTokens(ConstructedMakeList, ConstructedReplacements[Rep], ProjectSettings.ComponentSettings[Comp]);
 
-        ConstructedReadMe := ConstructedReadMe + '![' + ProjectSettings.ComponentSettings[Comp].DelphiPackageName + '](images/png/128/' + ProjectSettings.ComponentSettings[Comp].DelphiPackageName + '.png)' + sLineBreak;
+        ConstructedReadMe := ConstructedReadMe + '![' + ProjectSettings.ComponentSettings[Comp].DelphiPackageName + '](images/png/128/' + ProjectSettings.ComponentSettings[Comp].DelphiPackageName + '.png)' + sLineBreak + sLineBreak;
         if ProjectSettings.ComponentSettings[Comp].PackageDesc = String.Empty then
-          ConstructedReadMe := ConstructedReadMe + '* **' + ProjectSettings.ComponentSettings[Comp].DelphiPackageName + '**' + sLineBreak
+          ConstructedReadMe := ConstructedReadMe + '* **' + ProjectSettings.ComponentSettings[Comp].DelphiPackageName + '**' + sLineBreak + sLineBreak
         else
-          ConstructedReadMe := ConstructedReadMe + '* **' + ProjectSettings.ComponentSettings[Comp].DelphiPackageName + '** - ' + ProjectSettings.ComponentSettings[Comp].PackageDesc + sLineBreak;
+          ConstructedReadMe := ConstructedReadMe + '* **' + ProjectSettings.ComponentSettings[Comp].DelphiPackageName + '** - ' + ProjectSettings.ComponentSettings[Comp].PackageDesc + sLineBreak + sLineBreak;
         if ProjectSettings.ComponentSettings[Comp].HomeURL <> String.Empty then
-          ConstructedReadMe := ConstructedReadMe + '' + sLineBreak;
+          ConstructedReadMe := ConstructedReadMe + 'Homepage : ' + ProjectSettings.ComponentSettings[Comp].HomeURL + sLineBreak + sLineBreak;
         if ProjectSettings.ComponentSettings[Comp].PyPiURL <> String.Empty then
-          ConstructedReadMe := ConstructedReadMe  + '' + sLineBreak;
+          ConstructedReadMe := ConstructedReadMe  + 'PIPi : ' + ProjectSettings.ComponentSettings[Comp].PyPiURL + sLineBreak + sLineBreak;
         if ProjectSettings.ComponentSettings[Comp].DocURL <> String.Empty then
-          ConstructedReadMe := ConstructedReadMe  + '' + sLineBreak;
+          ConstructedReadMe := ConstructedReadMe  + 'Documentation : ' + ProjectSettings.ComponentSettings[Comp].DocURL + sLineBreak + sLineBreak;
         if ProjectSettings.ComponentSettings[Comp].GithubURL <> String.Empty then
-          ConstructedReadMe := ConstructedReadMe  + '' + sLineBreak;
-        ConstructedReadMe := ConstructedReadMe  + sLineBreak;
+          ConstructedReadMe := ConstructedReadMe  + 'Github : ' + ProjectSettings.ComponentSettings[Comp].GithubURL + sLineBreak;
+        ConstructedReadMe := ConstructedReadMe + sLineBreak + sLineBreak;
       end;
 
     Tokens := ReplacementList[GroupProjIDX];
