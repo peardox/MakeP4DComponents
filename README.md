@@ -10,7 +10,7 @@ To install just download the Release, extract it and double click on MakeP4DComp
 
 The window you get looks like this...
 
-![mainForm](D:\src\MakeP4DComponents\images\mainForm.png)
+![mainForm](images/mainForm.png)
 
 This form allows you to enter the holistic overview of the collection of components you are creating. The fields in the form are mainly for some housekeeping that Delphi wants to know but there are others that automatically create a README.md for you such as the text entry area labelled README.md Text.
 Directly under this box is a CheckBox that, if ticked, will add the details from the Python packages (getting to that part next) you include. The addition of the optional fields is not mandatory but it makes sense to enter as much information as possible.  
@@ -19,7 +19,7 @@ A really important field on the above page is the Palette Page. This is where al
 
 Click on the Add Package button an a new window will open allowing you to enter the details of a Python Package.
 
-![componentForm](D:\src\MakeP4DComponents\images\componentForm.png)
+![componentForm](images/componentForm.png)
 
 The first five fields are mandatory as these define the individual component you are adding. The Default Icon (by Jim McKeeth) is there so that you at least have some image. If you have the time obtain a proper icon and change the one provided by clicking on the Default icon and loading in your preferred image.
 
@@ -51,7 +51,7 @@ This also allows some flexibility - I might already have a component installed I
 
 There is a sample p4d included in the repo at https://github.com/peardox/TestComponentPackage that resulted from my second test run (the first had *really bad* MarkDown rather than just poor MarkDown) You can load it into MakeP4DComponents and you'll get this test set of components (I need to do proper Icons for) that will be used in a future Tutorial.
 
-![TestRun](D:\src\MakeP4DComponents\images\TestRun.png)
+![TestRun](images/TestRun.png)
 
 Supporting the following projects (with special note to the last two)
 
@@ -72,4 +72,3 @@ https://github.com/Embarcadero/PythonPackages4Delphi
 
 
 Make sure you "brcc32 EmbeddedResources.rc" before trying to build if you alter any resources
-
