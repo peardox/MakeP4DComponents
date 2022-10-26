@@ -15,7 +15,9 @@ uses
 {$R *.res}
 
 begin
-  // ReportMemoryLeaksOnShutdown := True;
+  {$IFDEF DEBUG}
+  ReportMemoryLeaksOnShutdown := True;
+  {$ENDIF}
   Application.Initialize;
   Application.CreateForm(TMainForm, MainForm);
   Application.CreateForm(TComponentForm, ComponentForm);

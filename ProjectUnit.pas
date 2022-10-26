@@ -156,6 +156,7 @@ begin
   FImage.Align := TAlignLayout.Bottom;
   FImage.OnMouseDown := HandleMouseDown;
   FImage.Parent := Self;
+  FImage.ShowHint := True;
 
   FCaption := TLabel.Create(Self);
   FCaption.TextSettings.HorzAlign := TTextAlign.Center;
@@ -460,6 +461,8 @@ begin
         IconImage := CellImage.Image;
         IconImage.Width := 128;
         IconImage.Height := 128;
+        IconImage.Hint := NewComponent.DelphiPackageName;
+
         DecodeBase64Image(LBitmap, NewComponent.PackageIcon);
         IconImage.Bitmap.Assign(LBitmap);
         CellImage.Caption.Text := NewComponent.DelphiPackageName;
@@ -480,6 +483,7 @@ begin
   ComponentForm.ComponentSettings := AComponent;
   ComponentForm.LoadDefaultIcon;
   ComponentForm.PopulateForm;
+  ComponentForm.Caption := 'Add New Package';
   MR := ComponentForm.ShowModal;
   if MR = mrOK then
     begin
@@ -506,6 +510,7 @@ begin
     ComponentForm.ComponentSettings := CopyComponent;
     ComponentForm.LoadDefaultIcon;
     ComponentForm.PopulateForm;
+    ComponentForm.Caption := 'Edit Existing Package';
     MR := ComponentForm.ShowModal;
     if MR = mrOK then
       begin
@@ -633,7 +638,9 @@ begin
     SaveExportZipDialog.Filename := ProjectSettings.ProjectGroupName + '.zip';
 
     InitialDir := TPath.GetSharedDocumentsPath;
+    {$IFDEF PEARDOX_TESTING}
     InitialDir := 'D:\Temp\ExportTest';
+    {$ENDIF}
     if SelectDirectory('Export Component Package as a Folder', InitialDir, Dir) then
       begin
         if DirectoryExists(Dir) then
@@ -772,6 +779,7 @@ begin
             IconImage := CellImage.Image;
             IconImage.Width := 128;
             IconImage.Height := 128;
+            IconImage.Hint := ProjectSettings.ComponentSettings[I].DelphiPackageName;
 
             DecodeBase64Image(LBitmap, ProjectSettings.ComponentSettings[I].PackageIcon);
             IconImage.Bitmap.Assign(LBitmap);

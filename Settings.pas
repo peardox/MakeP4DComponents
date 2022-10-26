@@ -192,9 +192,8 @@ var
 begin
   if Assigned(ProjectSettings) then
     begin
+      lSerializer := TJsonSerializer.Create;
       try
-        lSerializer := TJsonSerializer.Create;
-
         try
           JSONText := lSerializer.Serialize<TProjectSettings>(ProjectSettings);
           try
