@@ -1,4 +1,4 @@
-﻿# MakeP4DComponents
+﻿# MakeP4DComponents <a href="https://discord.gg/SgwW3tTz3p"><img align="right" width="300" height="304" src="images/discord.png"></a>
 
 Provides a user-friendly 'Wizard' to allow the creation of Delphi Components for the P4D Suite of projects
 
