@@ -82,9 +82,12 @@ var
   ConstructedComponentProjects: String;
   ConstructedRuntimeTargets: String;
   ConstructedComponentTargets: String;
-  ConstructedBuildList: String;
-  ConstructedCleanList: String;
-  ConstructedMakeList: String;
+  ConstructedP4DBuildList: String;
+  ConstructedP4DCleanList: String;
+  ConstructedP4DMakeList: String;
+  ConstructedDCLBuildList: String;
+  ConstructedDCLCleanList: String;
+  ConstructedDCLMakeList: String;
   ConstructedReadMe: String;
   ProjectFileName: String;
   ProjectFileText: String;
@@ -96,9 +99,12 @@ begin
   ConstructedComponentProjects := String.Empty;
   ConstructedRuntimeTargets := String.Empty;
   ConstructedComponentTargets := String.Empty;
-  ConstructedBuildList := String.Empty;
-  ConstructedCleanList := String.Empty;
-  ConstructedMakeList := String.Empty;
+  ConstructedP4DBuildList := String.Empty;
+  ConstructedP4DCleanList := String.Empty;
+  ConstructedP4DMakeList := String.Empty;
+  ConstructedDCLBuildList := String.Empty;
+  ConstructedDCLCleanList := String.Empty;
+  ConstructedDCLMakeList := String.Empty;
   ConstructedReadMe := String.Empty;
 
   try
@@ -199,22 +205,40 @@ begin
 
 
           if Comp <> 0 then
-            ConstructedBuildList := ConstructedBuildList + ';';
-          ConstructedBuildList := ConstructedBuildList + BuildComponentList;
+            ConstructedP4DBuildList := ConstructedP4DBuildList + ';';
+          ConstructedP4DBuildList := ConstructedP4DBuildList + BuildP4DComponentList;
           for Rep := 0 to Length(ConstructedReplacements) - 1 do
-            ReplaceTokens(ConstructedBuildList, ConstructedReplacements[Rep], ProjectSettings.ComponentSettings[Comp]);
+            ReplaceTokens(ConstructedP4DBuildList, ConstructedReplacements[Rep], ProjectSettings.ComponentSettings[Comp]);
 
           if Comp <> 0 then
-            ConstructedCleanList := ConstructedCleanList + ';';
-          ConstructedCleanList := ConstructedCleanList + CleanComponentList;
+            ConstructedDCLBuildList := ConstructedDCLBuildList + ';';
+          ConstructedDCLBuildList := ConstructedDCLBuildList + BuildDCLComponentList;
           for Rep := 0 to Length(ConstructedReplacements) - 1 do
-            ReplaceTokens(ConstructedCleanList, ConstructedReplacements[Rep], ProjectSettings.ComponentSettings[Comp]);
+            ReplaceTokens(ConstructedDCLBuildList, ConstructedReplacements[Rep], ProjectSettings.ComponentSettings[Comp]);
 
           if Comp <> 0 then
-            ConstructedMakeList := ConstructedMakeList + ';';
-          ConstructedMakeList := ConstructedMakeList + MakeComponentList;
+            ConstructedP4DCleanList := ConstructedP4DCleanList + ';';
+          ConstructedP4DCleanList := ConstructedP4DCleanList + CleanP4DComponentList;
           for Rep := 0 to Length(ConstructedReplacements) - 1 do
-            ReplaceTokens(ConstructedMakeList, ConstructedReplacements[Rep], ProjectSettings.ComponentSettings[Comp]);
+            ReplaceTokens(ConstructedP4DCleanList, ConstructedReplacements[Rep], ProjectSettings.ComponentSettings[Comp]);
+
+          if Comp <> 0 then
+            ConstructedDCLCleanList := ConstructedDCLCleanList + ';';
+          ConstructedDCLCleanList := ConstructedDCLCleanList + CleanDCLComponentList;
+          for Rep := 0 to Length(ConstructedReplacements) - 1 do
+            ReplaceTokens(ConstructedDCLCleanList, ConstructedReplacements[Rep], ProjectSettings.ComponentSettings[Comp]);
+
+          if Comp <> 0 then
+            ConstructedP4DMakeList := ConstructedP4DMakeList + ';';
+          ConstructedP4DMakeList := ConstructedP4DMakeList + MakeP4DComponentList;
+          for Rep := 0 to Length(ConstructedReplacements) - 1 do
+            ReplaceTokens(ConstructedP4DMakeList, ConstructedReplacements[Rep], ProjectSettings.ComponentSettings[Comp]);
+
+          if Comp <> 0 then
+            ConstructedDCLMakeList := ConstructedDCLMakeList + ';';
+          ConstructedDCLMakeList := ConstructedDCLMakeList + MakeDCLComponentList;
+          for Rep := 0 to Length(ConstructedReplacements) - 1 do
+            ReplaceTokens(ConstructedDCLMakeList, ConstructedReplacements[Rep], ProjectSettings.ComponentSettings[Comp]);
 
           ConstructedReadMe := ConstructedReadMe + '![' + ProjectSettings.ComponentSettings[Comp].DelphiPackageName + '](images/png/128/' + ProjectSettings.ComponentSettings[Comp].DelphiPackageName + '.png)' + sLineBreak + sLineBreak;
           if ProjectSettings.ComponentSettings[Comp].PackageDesc = String.Empty then
@@ -244,9 +268,9 @@ begin
       ReplacedText := ReplacedText.Replace('__RUNTIME_TARGETS__', ConstructedRuntimeTargets);
       ReplacedText := ReplacedText.Replace('__COMPONENT_TARGETS__', ConstructedComponentTargets);
 
-      ReplacedText := ReplacedText.Replace('__BUILD_LIST__', ConstructedBuildList);
-      ReplacedText := ReplacedText.Replace('__CLEAN_LIST__', ConstructedCleanList);
-      ReplacedText := ReplacedText.Replace('__MAKE_LIST__', ConstructedMakeList);
+      ReplacedText := ReplacedText.Replace('__BUILD_LIST__', ConstructedP4DBuildList + ';' + ConstructedDCLBuildList);
+      ReplacedText := ReplacedText.Replace('__CLEAN_LIST__', ConstructedP4DCleanList + ';' + ConstructedDCLCleanList);
+      ReplacedText := ReplacedText.Replace('__MAKE_LIST__', ConstructedP4DMakeList + ';' + ConstructedDCLMakeList);
 
       for Rep := 0 to Length(Tokens.xlat) - 1 do
         ReplaceTokens(ReplacedText, Tokens.xlat[Rep]);

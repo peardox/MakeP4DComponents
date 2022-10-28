@@ -39,13 +39,16 @@ resourcestring
                       '    </Target>' + sLineBreak;
 
   //__BUILD_COMPONENT_LIST__
-  BuildComponentList = '__P4D____COMPONENT__;__DCL____P4D____COMPONENT__';
+  BuildP4DComponentList = '__P4D____COMPONENT__';
+  BuildDCLComponentList = '__DCL____P4D____COMPONENT__';
 
   //__CLEAN_COMPONENT_LIST__
-  CleanComponentList = '__P4D____COMPONENT__:Clean;__DCL____P4D____COMPONENT__:Clean';
+  CleanP4DComponentList = '__P4D____COMPONENT__:Clean';
+  CleanDCLComponentList = '__DCL____P4D____COMPONENT__:Clean';
 
   // __MAKE_COMPONENT_LIST__
-  MakeComponentList = '__P4D____COMPONENT__:Make;__DCL____P4D____COMPONENT__:Make';
+  MakeP4DComponentList = '__P4D____COMPONENT__:Make';
+  MakeDCLComponentList = '__DCL____P4D____COMPONENT__:Make';
 
 const
   FileNameReplacements: TArray<String> = [
